@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nestjs-app
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+      - DB_NAME=nestjs_starter
+      - JWT_ACCESS_SECRET=your_access_secret_change_me
+      - JWT_REFRESH_SECRET=your_refresh_secret_change_me
+      - JWT_ACCESS_EXPIRES_IN=15m
+      - JWT_REFRESH_EXPIRES_IN=7d
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - nestjs-network
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    container_name: nestjs-mysql
+    ports:
+      - '3307:3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=nestjs_starter
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD-SHELL', 'mysqladmin ping -h localhost -u root -proot']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nestjs-network
+    restart: unless-stopped
+
+networks:
+  nestjs-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
