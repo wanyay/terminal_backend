@@ -9,6 +9,9 @@ import { User } from './entities/user.entity';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { RolesService } from '@/modules/roles/roles.service';
 import { Role } from '@/modules/roles/enums/role.enum';
+import { PaginationQueryDto } from '@/shared/dto/pagination-query.dto';
+import { PaginatedResult } from '@/shared/interfaces/paginated-result.interface';
+import { paginate } from '@/shared/helpers/paginate';
 
 @Injectable()
 export class UsersService {
@@ -35,7 +38,6 @@ export class UsersService {
 
     const user = this.userRepository.create(userData);
 
-    // Assign default role if no roles provided
     const rolesToAssign = roleNames || [Role.USER];
     const roles = await Promise.all(
       rolesToAssign.map((roleName) => this.rolesService.findByName(roleName)),
@@ -45,8 +47,16 @@ export class UsersService {
     return this.userRepository.save(user);
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userRepository.find();
+  async findAll(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResult<User>> {
+    return paginate({
+      source: this.userRepository,
+      query: paginationQuery,
+      searchableFields: ['username', 'email', 'firstName', 'lastName'],
+      defaultSortBy: 'createdAt',
+      relations: ['roles'],
+    });
   }
 
   async findOne(id: string): Promise<User> {

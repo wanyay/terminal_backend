@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
   UseGuards,
   ParseUUIDPipe,
 } from '@nestjs/common';
@@ -14,6 +15,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
@@ -24,6 +26,7 @@ import { Roles } from '@/shared/decorators/roles.decorator';
 import { Permissions } from '@/shared/decorators/permissions.decorator';
 import { Role } from '@/modules/roles/enums/role.enum';
 import { Permission } from '@/modules/roles/enums/permission.enum';
+import { PaginationQueryDto } from '@/shared/dto/pagination-query.dto';
 
 @ApiTags('Users')
 @Controller({ path: 'users', version: '1' })
@@ -47,10 +50,17 @@ export class UsersController {
   @Roles(Role.SUPER_ADMIN)
   @Permissions(Permission.MANAGE_USERS)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Get all users (Super Admin only)' })
-  @ApiResponse({ status: 200, description: 'Return all users' })
-  findAll() {
-    return this.usersService.findAll();
+  @ApiOperation({
+    summary: 'Get all users with pagination, search, and sorting',
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'perPage', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'sortBy', required: false, type: String })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
+  @ApiResponse({ status: 200, description: 'Return paginated users' })
+  findAll(@Query() paginationQuery: PaginationQueryDto) {
+    return this.usersService.findAll(paginationQuery);
   }
 
   @Get(':id')
