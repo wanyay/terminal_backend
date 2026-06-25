@@ -9,6 +9,8 @@ import {
   Query,
   UseGuards,
   ParseUUIDPipe,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { TrucksService } from './trucks.service';
@@ -77,6 +79,7 @@ export class TrucksController {
   }
 
   @Post(':id/cancel')
+  @HttpCode(HttpStatus.OK)
   @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.SUPER_ADMIN)
   @Permissions(Permission.MANAGE_USERS)

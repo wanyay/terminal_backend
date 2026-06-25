@@ -28,10 +28,8 @@ export async function createTestApp(): Promise<INestApplication> {
     imports: [
       ConfigModule.forRoot({ isGlobal: true }),
       TypeOrmModule.forRoot({
-        type: 'sqljs',
-        autoSave: true,
-        location: 'test-db',
-        useLocalForage: false,
+        type: 'better-sqlite3',
+        database: ':memory:', // In-memory database for testing
         entities: [__dirname + '/../src/**/*.entity{.ts,.js}'],
         synchronize: true,
         dropSchema: true,

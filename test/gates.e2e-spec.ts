@@ -124,6 +124,15 @@ describe('Gates (e2e)', () => {
 
   it('GET /api/v1/gates — search by name', async () => {
     const headers = await getAuthHeader(app);
+    // First create a gate with "Alpha" in the name
+    await request(app.getHttpServer())
+      .post('/api/v1/gates')
+      .set(headers)
+      .send({
+        code: 'ALPHA-01',
+        name: 'Alpha Gate',
+        type: 'ENTRY',
+      });
     const res = await request(app.getHttpServer())
       .get('/api/v1/gates?search=Alpha')
       .set(headers)
