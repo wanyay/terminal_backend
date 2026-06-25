@@ -48,6 +48,9 @@ export class VisitorsController {
   @Permissions(Permission.MANAGE_USERS)
   @ApiOperation({ summary: 'Create a new visitor (Super Admin only)' })
   @ApiResponse({ status: 201, description: 'Visitor created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   create(@Body() createVisitorDto: CreateVisitorDto) {
     return this.visitorsService.create(createVisitorDto);
   }
@@ -60,6 +63,7 @@ export class VisitorsController {
   @ApiQuery({ name: 'sortBy', required: false, type: String })
   @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
   @ApiResponse({ status: 200, description: 'Return paginated visitors' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   findAll(@Query() paginationQuery: PaginationQueryDto) {
     return this.visitorsService.findAll(paginationQuery);
   }
@@ -72,6 +76,7 @@ export class VisitorsController {
   @ApiQuery({ name: 'sortBy', required: false, type: String })
   @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
   @ApiResponse({ status: 200, description: 'Return paginated active visitors' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   findAllActive(@Query() paginationQuery: PaginationQueryDto) {
     return this.visitorsService.findAllActive(paginationQuery);
   }
@@ -79,6 +84,7 @@ export class VisitorsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get visitor by ID' })
   @ApiResponse({ status: 200, description: 'Return visitor' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Visitor not found' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.visitorsService.findOne(id);
@@ -90,6 +96,9 @@ export class VisitorsController {
   @Permissions(Permission.REGISTER_ENTRY)
   @ApiOperation({ summary: 'Register a visitor entry' })
   @ApiResponse({ status: 201, description: 'Visitor entry registered successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   registerEntry(@Body() registerVisitorEntryDto: RegisterVisitorEntryDto) {
     return this.visitorsService.registerEntry(registerVisitorEntryDto);
   }
@@ -100,6 +109,8 @@ export class VisitorsController {
   @Permissions(Permission.REGISTER_EXIT)
   @ApiOperation({ summary: 'Register a visitor exit' })
   @ApiResponse({ status: 200, description: 'Visitor exit registered successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Visitor not found or not currently entered' })
   registerExit(
     @Param('id', ParseUUIDPipe) id: string,
@@ -115,6 +126,8 @@ export class VisitorsController {
   @Permissions(Permission.MANAGE_USERS)
   @ApiOperation({ summary: 'Cancel a visitor record (Super Admin only)' })
   @ApiResponse({ status: 200, description: 'Visitor cancelled successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Visitor not found or already exited' })
   cancel(@Param('id', ParseUUIDPipe) id: string) {
     return this.visitorsService.cancel(id);
@@ -126,6 +139,9 @@ export class VisitorsController {
   @Permissions(Permission.MANAGE_USERS)
   @ApiOperation({ summary: 'Update visitor (Super Admin only)' })
   @ApiResponse({ status: 200, description: 'Visitor updated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Visitor not found' })
   update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -140,6 +156,8 @@ export class VisitorsController {
   @Permissions(Permission.MANAGE_USERS)
   @ApiOperation({ summary: 'Delete visitor (Super Admin only)' })
   @ApiResponse({ status: 200, description: 'Visitor deleted successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Visitor not found' })
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.visitorsService.remove(id);

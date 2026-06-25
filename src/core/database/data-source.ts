@@ -9,7 +9,7 @@ export const dataSourceOptions: DataSourceOptions = {
   port: parseInt(process.env.DB_PORT || '3306', 10),
   username: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD || 'root',
-  database: process.env.DB_NAME || 'nestjs_starter',
+  database: process.env.DB_NAME || 'terminal',
   entities: [__dirname + '/../../**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/migrations/*{.ts,.js}'],
   synchronize: false,

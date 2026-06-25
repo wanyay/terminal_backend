@@ -37,9 +37,9 @@ async function bootstrap() {
 
   // Swagger configuration
   const config = new DocumentBuilder()
-    .setTitle('NestJS Starter Kit API')
+    .setTitle('Terminal Port Management System (TPMS) API')
     .setDescription(
-      'A production-ready NestJS starter kit with MySQL, TypeORM, and JWT-based Authentication',
+      'API for managing and monitoring vehicles and visitors entering/exiting a terminal port, with JWT authentication and RBAC',
     )
     .setVersion('1.0')
     .addBearerAuth(

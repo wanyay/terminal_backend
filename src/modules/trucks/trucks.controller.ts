@@ -12,7 +12,13 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { TrucksService } from './trucks.service';
 import {
   CreateTruckDto,
@@ -29,7 +35,7 @@ import { Role } from '@/modules/roles/enums/role.enum';
 import { Permission } from '@/modules/roles/enums/permission.enum';
 import { PaginationQueryDto } from '@/shared/dto/pagination-query.dto';
 
-@ApiTags('Trucks')
+@ApiTags('Container Trucks')
 @ApiBearerAuth('JWT-auth')
 @Controller({ path: 'trucks', version: '1' })
 @UseGuards(JwtAuthGuard)
@@ -40,21 +46,38 @@ export class TrucksController {
   @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.SUPER_ADMIN)
   @Permissions(Permission.MANAGE_USERS)
+  @ApiOperation({ summary: 'Create a new container truck record' })
+  @ApiResponse({ status: 201, description: 'Truck created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   create(@Body() createTruckDto: CreateTruckDto) {
     return this.trucksService.create(createTruckDto);
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all container trucks with pagination, search, and sorting' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'perPage', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'sortBy', required: false, type: String })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
+  @ApiResponse({ status: 200, description: 'Return paginated container trucks' })
   findAll(@Query() paginationQuery: PaginationQueryDto) {
     return this.trucksService.findAll(paginationQuery);
   }
 
   @Get('active')
+  @ApiOperation({ summary: 'Get all active (entered) container trucks' })
+  @ApiResponse({ status: 200, description: 'Return active container trucks' })
   findAllActive() {
     return this.trucksService.findAllActive();
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get a container truck by ID' })
+  @ApiResponse({ status: 200, description: 'Return container truck' })
+  @ApiResponse({ status: 404, description: 'Truck not found' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.trucksService.findOne(id);
   }
@@ -63,6 +86,11 @@ export class TrucksController {
   @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.SUPER_ADMIN, Role.SECURITY_OFFICER)
   @Permissions(Permission.REGISTER_ENTRY)
+  @ApiOperation({ summary: 'Register a container truck entry' })
+  @ApiResponse({ status: 201, description: 'Entry registered successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   registerEntry(@Body() dto: RegisterTruckEntryDto) {
     return this.trucksService.registerEntry(dto);
   }
@@ -71,6 +99,12 @@ export class TrucksController {
   @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.SUPER_ADMIN, Role.SECURITY_OFFICER)
   @Permissions(Permission.REGISTER_EXIT)
+  @ApiOperation({ summary: 'Register a container truck exit' })
+  @ApiResponse({ status: 201, description: 'Exit registered successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Truck not found' })
   registerExit(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: RegisterTruckExitDto,
@@ -83,6 +117,11 @@ export class TrucksController {
   @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.SUPER_ADMIN)
   @Permissions(Permission.MANAGE_USERS)
+  @ApiOperation({ summary: 'Cancel a container truck record' })
+  @ApiResponse({ status: 200, description: 'Truck cancelled successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Truck not found' })
   cancel(@Param('id', ParseUUIDPipe) id: string) {
     return this.trucksService.cancel(id);
   }
@@ -91,6 +130,12 @@ export class TrucksController {
   @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.SUPER_ADMIN)
   @Permissions(Permission.MANAGE_USERS)
+  @ApiOperation({ summary: 'Update a container truck record' })
+  @ApiResponse({ status: 200, description: 'Truck updated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Truck not found' })
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateTruckDto: UpdateTruckDto,
@@ -102,6 +147,11 @@ export class TrucksController {
   @UseGuards(RolesGuard, PermissionsGuard)
   @Roles(Role.SUPER_ADMIN)
   @Permissions(Permission.MANAGE_USERS)
+  @ApiOperation({ summary: 'Soft delete a container truck record' })
+  @ApiResponse({ status: 200, description: 'Truck deleted successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Truck not found' })
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.trucksService.remove(id);
   }
