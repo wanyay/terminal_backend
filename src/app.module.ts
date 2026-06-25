@@ -7,6 +7,7 @@ import { DatabaseModule } from '@/core/database/database.module';
 import { UsersModule } from '@/modules/users/users.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { RolesModule } from '@/modules/roles/roles.module';
+import { GatesModule } from '@/modules/gates/gates.module';
 import { HealthModule } from '@/modules/health/health.module';
 import { RequestContextMiddleware } from '@/shared/middleware/request-context.middleware';
 
@@ -24,8 +25,8 @@ import { RequestContextMiddleware } from '@/shared/middleware/request-context.mi
       useFactory: (configService: ConfigService) => ({
         throttlers: [
           {
-            ttl: configService.get<number>('throttler.ttl', 60000), // 60s in ms
-            limit: configService.get<number>('throttler.limit', 20), // 20 requests
+            ttl: configService.get<number>('throttler.ttl', 60000),
+            limit: configService.get<number>('throttler.limit', 20),
           },
         ],
       }),
@@ -33,6 +34,7 @@ import { RequestContextMiddleware } from '@/shared/middleware/request-context.mi
     UsersModule,
     AuthModule,
     RolesModule,
+    GatesModule,
     HealthModule,
   ],
   providers: [
