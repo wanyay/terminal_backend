@@ -20,15 +20,32 @@ export class RolesService {
   }
 
   async createDefaultRoles(): Promise<void> {
-    const roles = Object.values(Role);
+    const roleDefinitions: { name: string; description: string }[] = [
+      {
+        name: Role.SUPER_ADMIN,
+        description:
+          'Full system access: manage users, roles, permissions, gates, view audit logs and reports',
+      },
+      {
+        name: Role.SECURITY_OFFICER,
+        description:
+          'Register entry/exit, search records, print passes. Cannot manage users, roles, or system settings',
+      },
+      {
+        name: Role.SUPERVISOR,
+        description:
+          'View dashboard, view and export reports, search records. Cannot modify historical records',
+      },
+      {
+        name: Role.USER,
+        description: 'Basic user role with limited access',
+      },
+    ];
 
-    for (const roleName of roles) {
-      const existingRole = await this.findByName(roleName);
+    for (const def of roleDefinitions) {
+      const existingRole = await this.findByName(def.name);
       if (!existingRole) {
-        const role = this.roleRepository.create({
-          name: roleName,
-          description: `${roleName} role`,
-        });
+        const role = this.roleRepository.create(def);
         await this.roleRepository.save(role);
       }
     }

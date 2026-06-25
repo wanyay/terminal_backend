@@ -17,8 +17,8 @@ async function bootstrap() {
   await rolesService.createDefaultRoles();
   console.log('✅ Default roles created');
 
-  // Create admin user
-  console.log('Creating admin user...');
+  // Create super admin user
+  console.log('Creating super admin user...');
   const adminUsername = 'admin';
   const existingAdmin = await usersService.findByUsername(adminUsername);
 
@@ -27,11 +27,11 @@ async function bootstrap() {
       username: adminUsername,
       email: 'admin@example.com',
       password: 'admin123',
-      firstName: 'Admin',
-      lastName: 'User',
-      roles: [Role.ADMIN, Role.USER],
+      firstName: 'Super',
+      lastName: 'Admin',
+      roles: [Role.SUPER_ADMIN],
     });
-    console.log('✅ Admin user created (admin / admin123)');
+    console.log('✅ Super admin created (admin / admin123)');
   } else {
     console.log('ℹ️ Admin user already exists');
   }
