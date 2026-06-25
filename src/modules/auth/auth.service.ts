@@ -2,11 +2,12 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '@/modules/users/users.service';
-import { RegisterDto, LoginDto, TokensDto } from './dto';
+import { RegisterDto, LoginDto, ChangePasswordDto, TokensDto } from './dto';
 import { User } from '@/modules/users/entities/user.entity';
 
 @Injectable()
@@ -18,9 +19,20 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto): Promise<TokensDto> {
-    const existingUser = await this.usersService.findByEmail(registerDto.email);
+    const existingUser = await this.usersService.findByUsername(
+      registerDto.username,
+    );
     if (existingUser) {
-      throw new ConflictException('Email already exists');
+      throw new ConflictException('Username already exists');
+    }
+
+    if (registerDto.email) {
+      const existingEmail = await this.usersService.findByEmail(
+        registerDto.email,
+      );
+      if (existingEmail) {
+        throw new ConflictException('Email already exists');
+      }
     }
 
     const user = await this.usersService.create({
@@ -35,7 +47,7 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<TokensDto> {
-    const user = await this.usersService.findByEmail(loginDto.email);
+    const user = await this.usersService.findByUsername(loginDto.username);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -53,6 +65,32 @@ export class AuthService {
     await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
 
     return tokens;
+  }
+
+  async changePassword(
+    userId: string,
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<{ message: string }> {
+    const user = await this.usersService.findOne(userId);
+
+    const isCurrentPasswordValid = await user.validatePassword(
+      changePasswordDto.currentPassword,
+    );
+    if (!isCurrentPasswordValid) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+
+    if (changePasswordDto.currentPassword === changePasswordDto.newPassword) {
+      throw new BadRequestException(
+        'New password must be different from current password',
+      );
+    }
+
+    user.password = changePasswordDto.newPassword;
+    user.mustChangePassword = false;
+    await this.usersService.save(user);
+
+    return { message: 'Password changed successfully' };
   }
 
   async logout(userId: string): Promise<void> {
@@ -86,15 +124,19 @@ export class AuthService {
   private async generateTokens(user: User): Promise<TokensDto> {
     const payload = {
       sub: user.id,
+      username: user.username,
       email: user.email,
       roles: user.roles.map((role) => role.name),
     };
 
-    const accessSecret = this.configService.get<string>('jwt.accessSecret') || 'access_secret';
-    const refreshSecret = this.configService.get<string>('jwt.refreshSecret') || 'refresh_secret';
-    // Use seconds for expiresIn (15 minutes = 900 seconds, 7 days = 604800 seconds)
-    const accessExpiresIn = this.configService.get<number>('jwt.accessExpiresInSeconds') || 900;
-    const refreshExpiresIn = this.configService.get<number>('jwt.refreshExpiresInSeconds') || 604800;
+    const accessSecret =
+      this.configService.get<string>('jwt.accessSecret') || 'access_secret';
+    const refreshSecret =
+      this.configService.get<string>('jwt.refreshSecret') || 'refresh_secret';
+    const accessExpiresIn =
+      this.configService.get<number>('jwt.accessExpiresInSeconds') || 900;
+    const refreshExpiresIn =
+      this.configService.get<number>('jwt.refreshExpiresInSeconds') || 604800;
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {

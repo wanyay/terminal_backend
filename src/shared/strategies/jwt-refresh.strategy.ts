@@ -14,7 +14,8 @@ export class JwtRefreshStrategy extends PassportStrategy(
     configService: ConfigService,
     private readonly usersService: UsersService,
   ) {
-    const secretOrKey = configService.get<string>('jwt.refreshSecret') || 'refresh_secret';
+    const secretOrKey =
+      configService.get<string>('jwt.refreshSecret') || 'refresh_secret';
     super({
       jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
       ignoreExpiration: false,
@@ -23,7 +24,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
     } as const);
   }
 
-  async validate(req: Request, payload: { sub: string; email: string }) {
+  async validate(req: Request, payload: { sub: string; username: string }) {
     const refreshToken = req.body.refreshToken;
     const user = await this.usersService.findOne(payload.sub);
 
@@ -37,7 +38,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
 
     return {
       id: payload.sub,
-      email: payload.email,
+      username: payload.username,
       refreshToken,
     };
   }

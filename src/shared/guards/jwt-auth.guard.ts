@@ -6,6 +6,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { SKIP_MUST_CHANGE_PASSWORD_KEY } from '../decorators/skip-must-change-password.decorator';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -29,11 +30,28 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   handleRequest<TUser = unknown>(
     err: Error | null,
     user: TUser | false,
-    _info?: unknown,
+    info: unknown,
+    context: ExecutionContext,
   ): TUser {
     if (err || !user) {
       throw err || new UnauthorizedException('Invalid or expired token');
     }
+
+    // Check if user must change password
+    const mustChangePassword = (user as any)?.mustChangePassword;
+    if (mustChangePassword === true) {
+      const skipCheck = this.reflector.getAllAndOverride<boolean>(
+        SKIP_MUST_CHANGE_PASSWORD_KEY,
+        [context.getHandler(), context.getClass()],
+      );
+
+      if (!skipCheck) {
+        throw new UnauthorizedException(
+          'You must change your password before accessing this resource. Please use the /auth/change-password endpoint.',
+        );
+      }
+    }
+
     return user;
   }
 }

@@ -6,7 +6,8 @@ import { UsersService } from '@/modules/users/users.service';
 
 export interface JwtPayload {
   sub: string;
-  email: string;
+  username: string;
+  email: string | null;
   roles: string[];
 }
 
@@ -16,7 +17,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     configService: ConfigService,
     private readonly usersService: UsersService,
   ) {
-    const secretOrKey = configService.get<string>('jwt.accessSecret') || 'access_secret';
+    const secretOrKey =
+      configService.get<string>('jwt.accessSecret') || 'access_secret';
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -31,8 +33,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     }
     return {
       id: payload.sub,
+      username: payload.username,
       email: payload.email,
       roles: payload.roles,
+      mustChangePassword: user.mustChangePassword,
     };
   }
 }

@@ -15,11 +15,18 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, RefreshTokenDto, TokensDto } from './dto';
+import {
+  RegisterDto,
+  LoginDto,
+  RefreshTokenDto,
+  ChangePasswordDto,
+  TokensDto,
+} from './dto';
 import { JwtAuthGuard } from '@/shared/guards/jwt-auth.guard';
 import { JwtRefreshGuard } from '@/shared/guards/jwt-refresh.guard';
 import { CurrentUser } from '@/shared/decorators/current-user.decorator';
 import { Public } from '@/shared/decorators/public.decorator';
+import { SkipMustChangePasswordCheck } from '@/shared/decorators/skip-must-change-password.decorator';
 
 @ApiTags('Auth')
 @Controller({ path: 'auth', version: '1' })
@@ -34,7 +41,7 @@ export class AuthController {
     description: 'User registered successfully',
     type: TokensDto,
   })
-  @ApiResponse({ status: 409, description: 'Email already exists' })
+  @ApiResponse({ status: 409, description: 'Username already exists' })
   async register(@Body() registerDto: RegisterDto): Promise<TokensDto> {
     return this.authService.register(registerDto);
   }
@@ -42,7 +49,7 @@ export class AuthController {
   @Post('login')
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Login user' })
+  @ApiOperation({ summary: 'Login with username and password' })
   @ApiResponse({
     status: 200,
     description: 'Login successful',
@@ -55,6 +62,7 @@ export class AuthController {
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
+  @SkipMustChangePasswordCheck()
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Logout user' })
@@ -85,8 +93,24 @@ export class AuthController {
     return this.authService.refreshTokens(userId, refreshToken);
   }
 
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  @SkipMustChangePasswordCheck()
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Change current user password' })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiResponse({ status: 400, description: 'Current password is incorrect' })
+  async changePassword(
+    @CurrentUser('id') userId: string,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ): Promise<{ message: string }> {
+    return this.authService.changePassword(userId, changePasswordDto);
+  }
+
   @Get('profile')
   @UseGuards(JwtAuthGuard)
+  @SkipMustChangePasswordCheck()
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({ status: 200, description: 'Return current user profile' })

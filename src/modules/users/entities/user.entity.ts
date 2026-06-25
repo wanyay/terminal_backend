@@ -14,7 +14,10 @@ import { RoleEntity } from '@/modules/roles/entities/role.entity';
 @Entity('users')
 export class User extends BaseEntity {
   @Column({ unique: true })
-  email: string;
+  username: string;
+
+  @Column({ unique: true, nullable: true })
+  email: string | null;
 
   @Column()
   @Exclude()
@@ -25,6 +28,9 @@ export class User extends BaseEntity {
 
   @Column({ name: 'last_name' })
   lastName: string;
+
+  @Column({ name: 'must_change_password', default: true })
+  mustChangePassword: boolean;
 
   @Column({ name: 'is_active', default: true })
   isActive: boolean;

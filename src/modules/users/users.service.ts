@@ -19,9 +19,16 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const existingUser = await this.findByEmail(createUserDto.email);
+    const existingUser = await this.findByUsername(createUserDto.username);
     if (existingUser) {
-      throw new ConflictException('Email already exists');
+      throw new ConflictException('Username already exists');
+    }
+
+    if (createUserDto.email) {
+      const existingEmail = await this.findByEmail(createUserDto.email);
+      if (existingEmail) {
+        throw new ConflictException('Email already exists');
+      }
     }
 
     const { roles: roleNames, ...userData } = createUserDto;
@@ -50,12 +57,23 @@ export class UsersService {
     return user;
   }
 
+  async findByUsername(username: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { username } });
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({ where: { email } });
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
+
+    if (updateUserDto.username && updateUserDto.username !== user.username) {
+      const existingUser = await this.findByUsername(updateUserDto.username);
+      if (existingUser) {
+        throw new ConflictException('Username already exists');
+      }
+    }
 
     if (updateUserDto.email && updateUserDto.email !== user.email) {
       const existingUser = await this.findByEmail(updateUserDto.email);
@@ -88,5 +106,9 @@ export class UsersService {
     refreshToken: string | null,
   ): Promise<void> {
     await this.userRepository.update(userId, { refreshToken });
+  }
+
+  async save(user: User): Promise<User> {
+    return this.userRepository.save(user);
   }
 }
