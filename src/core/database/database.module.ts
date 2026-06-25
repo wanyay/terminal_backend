@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
+import { AuditSubscriber } from './subscribers/audit.subscriber';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ConfigService } from '@nestjs/config';
         password: configService.get('database.password'),
         database: configService.get('database.database'),
         entities: [__dirname + '/../../**/*.entity{.ts,.js}'],
+        subscribers: [AuditSubscriber],
         migrations: [__dirname + '/migrations/*{.ts,.js}'],
         synchronize: configService.get('app.nodeEnv') === 'development',
         logging: configService.get('app.nodeEnv') === 'development',

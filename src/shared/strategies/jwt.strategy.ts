@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '@/modules/users/users.service';
+import { requestContext } from '@/shared/context/request-context';
 
 export interface JwtPayload {
   sub: string;
@@ -31,6 +32,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (!user || !user.isActive) {
       throw new UnauthorizedException('User not found or inactive');
     }
+
+    // Set user in request context for audit trail
+    requestContext.setUser(payload.sub, payload.username);
+
     return {
       id: payload.sub,
       username: payload.username,
