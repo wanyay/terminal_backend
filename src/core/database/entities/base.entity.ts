@@ -19,12 +19,12 @@ export abstract class BaseEntity {
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   deletedAt: Date | null;
 
-  @Column({ name: 'created_by', type: 'uuid', nullable: true })
+  @Column({ name: 'created_by', type: 'varchar', nullable: true })
   createdBy: string | null;
 
-  @Column({ name: 'updated_by', type: 'uuid', nullable: true })
+  @Column({ name: 'updated_by', type: 'varchar', nullable: true })
   updatedBy: string | null;
 
-  @Column({ name: 'deleted_by', type: 'uuid', nullable: true })
+  @Column({ name: 'deleted_by', type: 'varchar', nullable: true })
   deletedBy: string | null;
 }

@@ -21,23 +21,23 @@ export class ContainerTruck extends BaseEntity {
   @JoinColumn({ name: 'entry_gate_id' })
   entryGate: Gate;
 
-  @Column({ name: 'entry_gate_id', nullable: true })
+  @Column({ name: 'entry_gate_id', type: 'varchar', nullable: true })
   entryGateId: string;
 
   @ManyToOne(() => Gate, { nullable: true })
   @JoinColumn({ name: 'exit_gate_id' })
   exitGate: Gate;
 
-  @Column({ name: 'exit_gate_id', nullable: true })
+  @Column({ name: 'exit_gate_id', type: 'varchar', nullable: true })
   exitGateId: string;
 
-  @Column({ name: 'entry_time', type: 'timestamp', nullable: true })
+  @Column({ name: 'entry_time', type: 'datetime', nullable: true })
   entryTime: Date;
 
-  @Column({ name: 'exit_time', type: 'timestamp', nullable: true })
+  @Column({ name: 'exit_time', type: 'datetime', nullable: true })
   exitTime: Date;
 
-  @Column({ type: 'enum', enum: TruckStatus, default: TruckStatus.ENTERED })
+  @Column({ type: 'varchar', default: TruckStatus.ENTERED })
   status: TruckStatus;
 
   @Column({ type: 'text', nullable: true })

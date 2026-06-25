@@ -10,7 +10,7 @@ export class Gate extends BaseEntity {
   @Column()
   name: string;
 
-  @Column({ type: 'enum', enum: GateType })
+  @Column({ type: 'varchar' })
   type: GateType;
 
   @Column({ nullable: true })
