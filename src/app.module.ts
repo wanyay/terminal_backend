@@ -8,6 +8,10 @@ import { UsersModule } from '@/modules/users/users.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { RolesModule } from '@/modules/roles/roles.module';
 import { GatesModule } from '@/modules/gates/gates.module';
+import { TrucksModule } from '@/modules/trucks/trucks.module';
+import { VisitorsModule } from '@/modules/visitors/visitors.module';
+import { VehiclesModule } from '@/modules/vehicles/vehicles.module';
+import { AuditLogsModule } from '@/modules/audit-logs/audit-logs.module';
 import { HealthModule } from '@/modules/health/health.module';
 import { RequestContextMiddleware } from '@/shared/middleware/request-context.middleware';
 
@@ -35,6 +39,10 @@ import { RequestContextMiddleware } from '@/shared/middleware/request-context.mi
     AuthModule,
     RolesModule,
     GatesModule,
+    TrucksModule,
+    VisitorsModule,
+    VehiclesModule,
+    AuditLogsModule,
     HealthModule,
   ],
   providers: [
