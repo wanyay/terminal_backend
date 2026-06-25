@@ -19,8 +19,11 @@ import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { JwtAuthGuard } from '@/shared/guards/jwt-auth.guard';
 import { RolesGuard } from '@/shared/guards/roles.guard';
+import { PermissionsGuard } from '@/shared/guards/permissions.guard';
 import { Roles } from '@/shared/decorators/roles.decorator';
+import { Permissions } from '@/shared/decorators/permissions.decorator';
 import { Role } from '@/modules/roles/enums/role.enum';
+import { Permission } from '@/modules/roles/enums/permission.enum';
 
 @ApiTags('Users')
 @Controller({ path: 'users', version: '1' })
@@ -28,8 +31,9 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles(Role.SUPER_ADMIN)
+  @Permissions(Permission.MANAGE_USERS)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Create a new user (Super Admin only)' })
   @ApiResponse({ status: 201, description: 'User created successfully' })
@@ -39,8 +43,9 @@ export class UsersController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles(Role.SUPER_ADMIN)
+  @Permissions(Permission.MANAGE_USERS)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get all users (Super Admin only)' })
   @ApiResponse({ status: 200, description: 'Return all users' })
@@ -59,8 +64,9 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles(Role.SUPER_ADMIN)
+  @Permissions(Permission.MANAGE_USERS)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update user (Super Admin only)' })
   @ApiResponse({ status: 200, description: 'User updated successfully' })
@@ -73,8 +79,9 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles(Role.SUPER_ADMIN)
+  @Permissions(Permission.MANAGE_USERS)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Delete user (Super Admin only)' })
   @ApiResponse({ status: 200, description: 'User deleted successfully' })

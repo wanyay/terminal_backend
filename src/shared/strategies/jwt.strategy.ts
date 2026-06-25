@@ -36,11 +36,17 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     // Set user in request context for audit trail
     requestContext.setUser(payload.sub, payload.username);
 
+    // Collect all permissions from user's roles
+    const permissions = user.roles.flatMap((role) =>
+      role.permissions.map((p) => p.name),
+    );
+
     return {
       id: payload.sub,
       username: payload.username,
       email: payload.email,
       roles: payload.roles,
+      permissions,
       mustChangePassword: user.mustChangePassword,
     };
   }
