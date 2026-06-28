@@ -1,6 +1,7 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, OneToMany } from 'typeorm';
 import { BaseEntity } from '@/core/database/entities/base.entity';
 import { GateType } from '../enums/gate-type.enum';
+import { User } from '@/modules/users/entities/user.entity';
 
 @Entity('gates')
 export class Gate extends BaseEntity {
@@ -18,4 +19,7 @@ export class Gate extends BaseEntity {
 
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
+
+  @OneToMany(() => User, (user) => user.assignedGate)
+  users: User[];
 }

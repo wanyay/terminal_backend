@@ -7,15 +7,15 @@ export class CreateTruckDto {
   @IsNotEmpty()
   licensePlate: string;
 
-  @ApiProperty({ example: 'CONT-5678' })
+  @ApiPropertyOptional({ example: 'CONT-5678' })
   @IsString()
-  @IsNotEmpty()
-  containerNumber: string;
+  @IsOptional()
+  containerNumber?: string;
 
-  @ApiProperty({ example: 'John Doe' })
+  @ApiPropertyOptional({ example: 'John Doe' })
   @IsString()
-  @IsNotEmpty()
-  driverName: string;
+  @IsOptional()
+  driverName?: string;
 
   @ApiPropertyOptional({ example: '12/ABC(N)123456' })
   @IsString()

@@ -20,8 +20,7 @@ describe('Auth (e2e)', () => {
         .send({
           username: 'testuser',
           password: 'password123',
-          firstName: 'Test',
-          lastName: 'User',
+          fullName: 'Test User',
           email: 'test@example.com',
         })
         .expect(201);
@@ -36,8 +35,7 @@ describe('Auth (e2e)', () => {
         .send({
           username: 'dupe',
           password: 'password123',
-          firstName: 'A',
-          lastName: 'B',
+          fullName: 'A B',
         })
         .expect(201);
       await request(app.getHttpServer())
@@ -45,8 +43,7 @@ describe('Auth (e2e)', () => {
         .send({
           username: 'dupe',
           password: 'password123',
-          firstName: 'A',
-          lastName: 'B',
+          fullName: 'A B',
         })
         .expect(409);
     });
@@ -54,7 +51,7 @@ describe('Auth (e2e)', () => {
     it('should reject short password', async () => {
       await request(app.getHttpServer())
         .post('/api/v1/auth/register')
-        .send({ username: 'u', password: '123', firstName: 'A', lastName: 'B' })
+        .send({ username: 'u', password: '123', fullName: 'A B' })
         .expect(400);
     });
   });
@@ -129,8 +126,7 @@ describe('Auth (e2e)', () => {
         .send({
           username: 'pwduser',
           password: 'oldpass1',
-          firstName: 'P',
-          lastName: 'U',
+          fullName: 'P U',
         });
       const headers = await getAuthHeader(app, 'pwduser', 'oldpass1');
       await request(app.getHttpServer())

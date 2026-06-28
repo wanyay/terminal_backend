@@ -80,8 +80,7 @@ export async function createTestApp(): Promise<INestApplication> {
       username: 'admin',
       email: 'admin@example.com',
       password: 'admin123',
-      firstName: 'Super',
-      lastName: 'Admin',
+      fullName: 'Super Admin',
       roles: [Role.SUPER_ADMIN],
     });
     admin.mustChangePassword = false;

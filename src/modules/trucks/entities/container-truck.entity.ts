@@ -8,10 +8,10 @@ export class ContainerTruck extends BaseEntity {
   @Column({ name: 'license_plate' })
   licensePlate: string;
 
-  @Column({ name: 'container_number' })
+  @Column({ name: 'container_number', nullable: true })
   containerNumber: string;
 
-  @Column({ name: 'driver_name' })
+  @Column({ name: 'driver_name', nullable: true })
   driverName: string;
 
   @Column({ name: 'driver_nrc', nullable: true })

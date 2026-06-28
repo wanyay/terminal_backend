@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { RolesService } from '@/modules/roles/roles.service';
+import { GatesService } from '@/modules/gates/gates.service';
 import { Role } from '@/modules/roles/enums/role.enum';
 import { PaginationQueryDto } from '@/shared/dto/pagination-query.dto';
 import { PaginatedResult } from '@/shared/interfaces/paginated-result.interface';
@@ -19,6 +20,7 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly rolesService: RolesService,
+    private readonly gatesService: GatesService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -34,7 +36,7 @@ export class UsersService {
       }
     }
 
-    const { roles: roleNames, ...userData } = createUserDto;
+    const { roles: roleNames, assignedGateId, ...userData } = createUserDto;
 
     const user = this.userRepository.create(userData);
 
@@ -43,6 +45,10 @@ export class UsersService {
       rolesToAssign.map((roleName) => this.rolesService.findByName(roleName)),
     );
     user.roles = roles.filter((role) => role !== null);
+
+    if (assignedGateId) {
+      user.assignedGate = await this.gatesService.findOne(assignedGateId);
+    }
 
     return this.userRepository.save(user);
   }
@@ -53,9 +59,9 @@ export class UsersService {
     return paginate({
       source: this.userRepository,
       query: paginationQuery,
-      searchableFields: ['username', 'email', 'firstName', 'lastName'],
+      searchableFields: ['username', 'email', 'fullName'],
       defaultSortBy: 'createdAt',
-      relations: ['roles'],
+      relations: ['roles', 'assignedGate'],
     });
   }
 
@@ -86,8 +92,8 @@ export class UsersService {
     }
 
     if (updateUserDto.email && updateUserDto.email !== user.email) {
-      const existingUser = await this.findByEmail(updateUserDto.email);
-      if (existingUser) {
+      const existingEmail = await this.findByEmail(updateUserDto.email);
+      if (existingEmail) {
         throw new ConflictException('Email already exists');
       }
     }
@@ -101,7 +107,15 @@ export class UsersService {
       user.roles = roles.filter((role) => role !== null);
     }
 
-    const { roles: _roles, ...dataToUpdate } = updateUserDto;
+    if (updateUserDto.assignedGateId !== undefined) {
+      if (updateUserDto.assignedGateId) {
+        user.assignedGate = await this.gatesService.findOne(updateUserDto.assignedGateId);
+      } else {
+        user.assignedGate = null;
+      }
+    }
+
+    const { roles: _roles, assignedGateId: _assignedGateId, ...dataToUpdate } = updateUserDto;
     Object.assign(user, dataToUpdate);
     return this.userRepository.save(user);
   }

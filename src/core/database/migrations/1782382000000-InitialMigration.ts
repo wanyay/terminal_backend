@@ -37,70 +37,70 @@ export class InitialMigration1782382000000 implements MigrationInterface {
     `);
 
     // Create users table
-    await queryRunner.query(`
-      CREATE TABLE \`users\` (
-        \`id\` varchar(36) NOT NULL,
-        \`created_at\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-        \`updated_at\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
-        \`deleted_at\` datetime(6) NULL,
-        \`created_by\` varchar(255) NULL,
-        \`updated_by\` varchar(255) NULL,
-        \`deleted_by\` varchar(255) NULL,
-        \`username\` varchar(255) NOT NULL,
-        \`email\` varchar(255) NULL,
-        \`password\` varchar(255) NOT NULL,
-        \`first_name\` varchar(255) NOT NULL,
-        \`last_name\` varchar(255) NOT NULL,
-        \`must_change_password\` tinyint NOT NULL DEFAULT 1,
-        \`is_active\` tinyint NOT NULL DEFAULT 1,
-        \`refresh_token\` varchar(255) NULL,
-        UNIQUE INDEX \`IDX_fe0bb3f6520ca7c769f7c8897b8\` (\`username\`),
-        UNIQUE INDEX \`IDX_97672ac88f789774dd470fbe8c8\` (\`email\`),
-        PRIMARY KEY (\`id\`)
-      ) ENGINE=InnoDB
-    `);
+  await queryRunner.query(`
+    CREATE TABLE \`users\` (
+      \`id\` varchar(36) NOT NULL,
+      \`created_at\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+      \`updated_at\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+      \`deleted_at\` datetime(6) NULL,
+      \`created_by\` varchar(255) NULL,
+      \`updated_by\` varchar(255) NULL,
+      \`deleted_by\` varchar(255) NULL,
+      \`username\` varchar(255) NOT NULL,
+      \`email\` varchar(255) NULL,
+      \`password\` varchar(255) NOT NULL,
+      \`full_name\` varchar(255) NOT NULL,
+      \`must_change_password\` tinyint NOT NULL DEFAULT 1,
+      \`is_active\` tinyint NOT NULL DEFAULT 1,
+      \`refresh_token\` text NULL,
+      \`assigned_gate_id\` varchar(36) NULL,
+      UNIQUE INDEX \`IDX_fe0bb3f6520ca7c769f7c8897b8\` (\`username\`),
+      UNIQUE INDEX \`IDX_97672ac88f789774dd470fbe8c8\` (\`email\`),
+      PRIMARY KEY (\`id\`)
+    ) ENGINE=InnoDB
+  `);
 
-    // Create user_roles join table
-    await queryRunner.query(`
-      CREATE TABLE \`user_roles\` (
-        \`user_id\` varchar(36) NOT NULL,
-        \`role_id\` varchar(36) NOT NULL,
-        INDEX \`IDX_47de65701748510c550a6043d97\` (\`user_id\`),
-        INDEX \`IDX_32911099e4999e6b216f03668e1\` (\`role_id\`),
-        PRIMARY KEY (\`user_id\`, \`role_id\`)
-      ) ENGINE=InnoDB
-    `);
+  // Create user_roles join table
+  await queryRunner.query(`
+    CREATE TABLE \`user_roles\` (
+      \`user_id\` varchar(36) NOT NULL,
+      \`role_id\` varchar(36) NOT NULL,
+      INDEX \`IDX_47de65701748510c550a6043d97\` (\`user_id\`),
+      INDEX \`IDX_32911099e4999e6b216f03668e1\` (\`role_id\`),
+      PRIMARY KEY (\`user_id\`, \`role_id\`)
+    ) ENGINE=InnoDB
+  `);
 
-    // Create role_permissions join table
-    await queryRunner.query(`
-      CREATE TABLE \`role_permissions\` (
-        \`role_id\` varchar(36) NOT NULL,
-        \`permission_id\` varchar(36) NOT NULL,
-        INDEX \`IDX_b36cb2e4a3799e83ca9b2343714\` (\`role_id\`),
-        INDEX \`IDX_63896553242188416031420018a\` (\`permission_id\`),
-        PRIMARY KEY (\`role_id\`, \`permission_id\`)
-      ) ENGINE=InnoDB
-    `);
+  // Create role_permissions join table
+  await queryRunner.query(`
+    CREATE TABLE \`role_permissions\` (
+      \`role_id\` varchar(36) NOT NULL,
+      \`permission_id\` varchar(36) NOT NULL,
+      INDEX \`IDX_b36cb2e4a3799e83ca9b2343714\` (\`role_id\`),
+      INDEX \`IDX_63896553242188416031420018a\` (\`permission_id\`),
+      PRIMARY KEY (\`role_id\`, \`permission_id\`)
+    ) ENGINE=InnoDB
+  `);
 
-    // Create gates table
-    await queryRunner.query(`
-      CREATE TABLE \`gates\` (
-        \`id\` varchar(36) NOT NULL,
-        \`created_at\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-        \`updated_at\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
-        \`deleted_at\` datetime(6) NULL,
-        \`created_by\` varchar(255) NULL,
-        \`updated_by\` varchar(255) NULL,
-        \`deleted_by\` varchar(255) NULL,
-        \`code\` varchar(255) NOT NULL,
-        \`name\` varchar(255) NOT NULL,
-        \`type\` varchar(255) NOT NULL,
-        \`description\` varchar(255) NULL,
-        \`is_active\` tinyint NOT NULL DEFAULT 1,
-        UNIQUE INDEX \`IDX_fc8604337a2432c687a0f1a7e31\` (\`code\`),
-        PRIMARY KEY (\`id\`)
-      ) ENGINE=InnoDB
-    `);
+  // Create gates table
+  await queryRunner.query(`
+    CREATE TABLE \`gates\` (
+      \`id\` varchar(36) NOT NULL,
+      \`created_at\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+      \`updated_at\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+      \`deleted_at\` datetime(6) NULL,
+      \`created_by\` varchar(255) NULL,
+      \`updated_by\` varchar(255) NULL,
+      \`deleted_by\` varchar(255) NULL,
+      \`code\` varchar(255) NOT NULL,
+      \`name\` varchar(255) NOT NULL,
+      \`type\` varchar(255) NOT NULL,
+      \`description\` varchar(255) NULL,
+      \`is_active\` tinyint NOT NULL DEFAULT 1,
+      UNIQUE INDEX \`IDX_fc8604337a2432c687a0f1a7e31\` (\`code\`),
+      PRIMARY KEY (\`id\`)
+    ) ENGINE=InnoDB
+  `);
 
     // Create container_trucks table
     await queryRunner.query(`
@@ -113,8 +113,8 @@ export class InitialMigration1782382000000 implements MigrationInterface {
         \`updated_by\` varchar(255) NULL,
         \`deleted_by\` varchar(255) NULL,
         \`license_plate\` varchar(255) NOT NULL,
-        \`container_number\` varchar(255) NOT NULL,
-        \`driver_name\` varchar(255) NOT NULL,
+        \`container_number\` varchar(255) NULL,
+        \`driver_name\` varchar(255) NULL,
         \`driver_nrc\` varchar(255) NULL,
         \`entry_gate_id\` varchar(36) NULL,
         \`exit_gate_id\` varchar(36) NULL,
@@ -221,6 +221,9 @@ export class InitialMigration1782382000000 implements MigrationInterface {
       ALTER TABLE \`role_permissions\` ADD CONSTRAINT \`FK_63896553242188416031420018a\` FOREIGN KEY (\`permission_id\`) REFERENCES \`permissions\`(\`id\`) ON DELETE CASCADE ON UPDATE NO ACTION
     `);
     await queryRunner.query(`
+      ALTER TABLE \`users\` ADD CONSTRAINT \`FK_users_assigned_gate\` FOREIGN KEY (\`assigned_gate_id\`) REFERENCES \`gates\`(\`id\`) ON DELETE SET NULL ON UPDATE NO ACTION
+    `);
+    await queryRunner.query(`
       ALTER TABLE \`container_trucks\` ADD CONSTRAINT \`FK_481704b5fa9192654b075756a1e\` FOREIGN KEY (\`entry_gate_id\`) REFERENCES \`gates\`(\`id\`) ON DELETE SET NULL ON UPDATE NO ACTION
     `);
     await queryRunner.query(`
@@ -247,6 +250,7 @@ export class InitialMigration1782382000000 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE \`visiting_vehicles\` DROP FOREIGN KEY \`FK_2547e077d3569b29f559265823e\``);
     await queryRunner.query(`ALTER TABLE \`container_trucks\` DROP FOREIGN KEY \`FK_b75079578b23b78719a6b27068e\``);
     await queryRunner.query(`ALTER TABLE \`container_trucks\` DROP FOREIGN KEY \`FK_481704b5fa9192654b075756a1e\``);
+    await queryRunner.query(`ALTER TABLE \`users\` DROP FOREIGN KEY \`FK_users_assigned_gate\``);
     await queryRunner.query(`ALTER TABLE \`role_permissions\` DROP FOREIGN KEY \`FK_63896553242188416031420018a\``);
     await queryRunner.query(`ALTER TABLE \`role_permissions\` DROP FOREIGN KEY \`FK_b36cb2e4a3799e83ca9b2343714\``);
     await queryRunner.query(`ALTER TABLE \`user_roles\` DROP FOREIGN KEY \`FK_32911099e4999e6b216f03668e1\``);

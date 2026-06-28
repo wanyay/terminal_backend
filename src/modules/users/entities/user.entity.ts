@@ -5,11 +5,14 @@ import {
   JoinTable,
   BeforeInsert,
   BeforeUpdate,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import * as bcrypt from 'bcryptjs';
 import { BaseEntity } from '@/core/database/entities/base.entity';
 import { RoleEntity } from '@/modules/roles/entities/role.entity';
+import { Gate } from '@/modules/gates/entities/gate.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -23,11 +26,8 @@ export class User extends BaseEntity {
   @Exclude()
   password: string;
 
-  @Column({ name: 'first_name' })
-  firstName: string;
-
-  @Column({ name: 'last_name' })
-  lastName: string;
+  @Column({ name: 'full_name' })
+  fullName: string;
 
   @Column({ name: 'must_change_password', default: true })
   mustChangePassword: boolean;
@@ -35,7 +35,7 @@ export class User extends BaseEntity {
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
-  @Column({ name: 'refresh_token', type: 'varchar', nullable: true })
+  @Column({ name: 'refresh_token', type: 'text', nullable: true })
   @Exclude()
   refreshToken: string | null = null;
 
@@ -46,6 +46,10 @@ export class User extends BaseEntity {
     inverseJoinColumn: { name: 'role_id', referencedColumnName: 'id' },
   })
   roles: RoleEntity[];
+
+  @ManyToOne(() => Gate, { eager: true, nullable: true })
+  @JoinColumn({ name: 'assigned_gate_id' })
+  assignedGate: Gate | null;
 
   @BeforeInsert()
   @BeforeUpdate()
@@ -62,9 +66,5 @@ export class User extends BaseEntity {
 
   async validatePassword(password: string): Promise<boolean> {
     return bcrypt.compare(password, this.password);
-  }
-
-  get fullName(): string {
-    return `${this.firstName} ${this.lastName}`;
   }
 }
