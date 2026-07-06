@@ -25,6 +25,7 @@ import {
   UpdateTruckDto,
   RegisterTruckEntryDto,
   RegisterTruckExitDto,
+  ActiveTrucksQueryDto,
 } from './dto';
 import { JwtAuthGuard } from '@/shared/guards/jwt-auth.guard';
 import { RolesGuard } from '@/shared/guards/roles.guard';
@@ -76,26 +77,12 @@ export class TrucksController {
   @ApiOperation({
     summary: 'Get all active (entered) container trucks with pagination',
   })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'perPage', required: false, type: Number })
-  @ApiQuery({ name: 'search', required: false, type: String })
-  @ApiQuery({ name: 'sortBy', required: false, type: String })
-  @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
-  @ApiQuery({
-    name: 'gateId',
-    required: false,
-    type: String,
-    description: 'Filter by entry gate ID',
-  })
   @ApiResponse({
     status: 200,
     description: 'Return paginated active container trucks',
   })
-  findAllActive(
-    @Query() paginationQuery: PaginationQueryDto,
-    @Query('gateId') gateId?: string,
-  ) {
-    return this.trucksService.findAllActive(paginationQuery, gateId);
+  findAllActive(@Query() query: ActiveTrucksQueryDto) {
+    return this.trucksService.findAllActive(query, query.gateId);
   }
 
   @Get(':id')

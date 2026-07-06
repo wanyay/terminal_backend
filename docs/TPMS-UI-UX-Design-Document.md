@@ -179,8 +179,6 @@ Three tabs at the top to switch between entry types:
 | Remarks | textarea | ❌ |
 | **Submit** | button | |
 
-> **Note for Security Officers:** The Entry Gate dropdown defaults to their assigned gate and is read-only.
-
 #### Success State
 
 After successful entry registration, show a success toast or modal with the record summary and a **Print Pass** button.
