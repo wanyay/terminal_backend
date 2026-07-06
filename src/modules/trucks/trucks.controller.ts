@@ -56,22 +56,46 @@ export class TrucksController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all container trucks with pagination, search, and sorting' })
+  @ApiOperation({
+    summary: 'Get all container trucks with pagination, search, and sorting',
+  })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'perPage', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'sortBy', required: false, type: String })
   @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
-  @ApiResponse({ status: 200, description: 'Return paginated container trucks' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return paginated container trucks',
+  })
   findAll(@Query() paginationQuery: PaginationQueryDto) {
     return this.trucksService.findAll(paginationQuery);
   }
 
   @Get('active')
-  @ApiOperation({ summary: 'Get all active (entered) container trucks' })
-  @ApiResponse({ status: 200, description: 'Return active container trucks' })
-  findAllActive() {
-    return this.trucksService.findAllActive();
+  @ApiOperation({
+    summary: 'Get all active (entered) container trucks with pagination',
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'perPage', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'sortBy', required: false, type: String })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
+  @ApiQuery({
+    name: 'gateId',
+    required: false,
+    type: String,
+    description: 'Filter by entry gate ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return paginated active container trucks',
+  })
+  findAllActive(
+    @Query() paginationQuery: PaginationQueryDto,
+    @Query('gateId') gateId?: string,
+  ) {
+    return this.trucksService.findAllActive(paginationQuery, gateId);
   }
 
   @Get(':id')

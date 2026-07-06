@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -36,7 +37,12 @@ export class UsersService {
       }
     }
 
-    const { roles: roleNames, assignedGateId, ...userData } = createUserDto;
+    const {
+      roles: roleNames,
+      assignedGateId,
+      manageableGateIds,
+      ...userData
+    } = createUserDto;
 
     const user = this.userRepository.create(userData);
 
@@ -46,8 +52,24 @@ export class UsersService {
     );
     user.roles = roles.filter((role) => role !== null);
 
+    const isSecurityOfficer = rolesToAssign.includes(Role.SECURITY_OFFICER);
+
+    if (isSecurityOfficer && manageableGateIds?.length) {
+      throw new BadRequestException(
+        'Security Officers cannot be assigned to multiple manageable gates. Use assignedGateId instead.',
+      );
+    }
+
     if (assignedGateId) {
       user.assignedGate = await this.gatesService.findOne(assignedGateId);
+    }
+
+    if (manageableGateIds?.length) {
+      user.manageableGates = await Promise.all(
+        manageableGateIds.map((gateId) => this.gatesService.findOne(gateId)),
+      );
+    } else {
+      user.manageableGates = [];
     }
 
     return this.userRepository.save(user);
@@ -61,7 +83,7 @@ export class UsersService {
       query: paginationQuery,
       searchableFields: ['username', 'email', 'fullName'],
       defaultSortBy: 'createdAt',
-      relations: ['roles', 'assignedGate'],
+      relations: ['roles', 'assignedGate', 'manageableGates'],
     });
   }
 
@@ -109,13 +131,40 @@ export class UsersService {
 
     if (updateUserDto.assignedGateId !== undefined) {
       if (updateUserDto.assignedGateId) {
-        user.assignedGate = await this.gatesService.findOne(updateUserDto.assignedGateId);
+        user.assignedGate = await this.gatesService.findOne(
+          updateUserDto.assignedGateId,
+        );
       } else {
         user.assignedGate = null;
       }
     }
 
-    const { roles: _roles, assignedGateId: _assignedGateId, ...dataToUpdate } = updateUserDto;
+    if (updateUserDto.manageableGateIds !== undefined) {
+      const isSecurityOfficer = user.roles?.some(
+        (role) => role.name === Role.SECURITY_OFFICER,
+      );
+      if (isSecurityOfficer && updateUserDto.manageableGateIds.length > 0) {
+        throw new BadRequestException(
+          'Security Officers cannot be assigned to multiple manageable gates. Use assignedGateId instead.',
+        );
+      }
+      if (updateUserDto.manageableGateIds.length > 0) {
+        user.manageableGates = await Promise.all(
+          updateUserDto.manageableGateIds.map((gateId) =>
+            this.gatesService.findOne(gateId),
+          ),
+        );
+      } else {
+        user.manageableGates = [];
+      }
+    }
+
+    const {
+      roles: _roles,
+      assignedGateId: _assignedGateId,
+      manageableGateIds: _manageableGateIds,
+      ...dataToUpdate
+    } = updateUserDto;
     Object.assign(user, dataToUpdate);
     return this.userRepository.save(user);
   }

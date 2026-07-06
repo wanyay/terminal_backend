@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { IsBoolean, IsOptional, IsUUID } from 'class-validator';
+import { IsBoolean, IsOptional, IsUUID, IsArray } from 'class-validator';
 import { CreateUserDto } from './create-user.dto';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
@@ -12,4 +12,10 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsUUID()
   @IsOptional()
   assignedGateId?: string;
+
+  @ApiPropertyOptional({ example: ['gate-id-1', 'gate-id-2'] })
+  @IsUUID('4', { each: true })
+  @IsArray()
+  @IsOptional()
+  manageableGateIds?: string[];
 }

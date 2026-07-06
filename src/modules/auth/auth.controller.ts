@@ -101,14 +101,27 @@ export class AuthController {
   @SkipMustChangePasswordCheck()
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Change current user password' })
+  @ApiOperation({
+    summary: 'Change password (self-serve or admin reset)',
+    description:
+      'Self-serve: provide currentPassword + newPassword. ' +
+      'Admin reset: provide targetUserId + newPassword (no currentPassword needed).',
+  })
   @ApiResponse({ status: 200, description: 'Password changed successfully' })
-  @ApiResponse({ status: 400, description: 'Current password is incorrect' })
+  @ApiResponse({
+    status: 400,
+    description: 'Current password is incorrect or validation failed',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Only admins can reset another user password',
+  })
   async changePassword(
     @CurrentUser('id') userId: string,
+    @CurrentUser('roles') roles: string[],
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<{ message: string }> {
-    return this.authService.changePassword(userId, changePasswordDto);
+    return this.authService.changePassword(userId, roles, changePasswordDto);
   }
 
   @Get('profile')

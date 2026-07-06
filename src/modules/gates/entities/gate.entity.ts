@@ -1,4 +1,4 @@
-import { Entity, Column, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany, ManyToMany } from 'typeorm';
 import { BaseEntity } from '@/core/database/entities/base.entity';
 import { GateType } from '../enums/gate-type.enum';
 import { User } from '@/modules/users/entities/user.entity';
@@ -22,4 +22,7 @@ export class Gate extends BaseEntity {
 
   @OneToMany(() => User, (user) => user.assignedGate)
   users: User[];
+
+  @ManyToMany(() => User, (user) => user.manageableGates)
+  managingUsers: User[];
 }

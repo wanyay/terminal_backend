@@ -40,4 +40,10 @@ export class CreateUserDto {
   @IsUUID()
   @IsOptional()
   assignedGateId?: string;
+
+  @ApiPropertyOptional({ example: ['gate-id-1', 'gate-id-2'] })
+  @IsUUID('4', { each: true })
+  @IsArray()
+  @IsOptional()
+  manageableGateIds?: string[];
 }

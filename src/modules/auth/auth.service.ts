@@ -3,12 +3,14 @@ import {
   UnauthorizedException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '@/modules/users/users.service';
 import { RegisterDto, LoginDto, ChangePasswordDto, TokensDto } from './dto';
 import { User } from '@/modules/users/entities/user.entity';
+import { Role } from '@/modules/roles/enums/role.enum';
 
 @Injectable()
 export class AuthService {
@@ -68,26 +70,46 @@ export class AuthService {
   }
 
   async changePassword(
-    userId: string,
+    currentUserId: string,
+    currentUserRoles: string[],
     changePasswordDto: ChangePasswordDto,
   ): Promise<{ message: string }> {
-    const user = await this.usersService.findOne(userId);
+    const isAdminReset = !!changePasswordDto.targetUserId;
 
-    const isCurrentPasswordValid = await user.validatePassword(
-      changePasswordDto.currentPassword,
-    );
-    if (!isCurrentPasswordValid) {
-      throw new BadRequestException('Current password is incorrect');
+    if (isAdminReset) {
+      const isAdmin =
+        currentUserRoles.includes(Role.SUPER_ADMIN) ||
+        currentUserRoles.includes(Role.SUPERVISOR);
+      if (!isAdmin) {
+        throw new ForbiddenException(
+          'Only admins can reset another user password',
+        );
+      }
     }
 
-    if (changePasswordDto.currentPassword === changePasswordDto.newPassword) {
-      throw new BadRequestException(
-        'New password must be different from current password',
+    const targetUserId = isAdminReset
+      ? changePasswordDto.targetUserId!
+      : currentUserId;
+
+    const user = await this.usersService.findOne(targetUserId);
+
+    if (!isAdminReset) {
+      const isCurrentPasswordValid = await user.validatePassword(
+        changePasswordDto.currentPassword!,
       );
+      if (!isCurrentPasswordValid) {
+        throw new BadRequestException('Current password is incorrect');
+      }
+
+      if (changePasswordDto.currentPassword === changePasswordDto.newPassword) {
+        throw new BadRequestException(
+          'New password must be different from current password',
+        );
+      }
     }
 
     user.password = changePasswordDto.newPassword;
-    user.mustChangePassword = false;
+    user.mustChangePassword = changePasswordDto.mustChangePassword ?? false;
     await this.usersService.save(user);
 
     return { message: 'Password changed successfully' };

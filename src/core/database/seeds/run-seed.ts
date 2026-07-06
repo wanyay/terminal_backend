@@ -23,12 +23,42 @@ async function bootstrap() {
   // Create default gates
   console.log('Creating default gates...');
   const defaultGates = [
-    { code: 'EG-01', name: 'Entry Gate 1', type: GateType.ENTRY, description: 'Main entry gate for container trucks' },
-    { code: 'EG-02', name: 'Entry Gate 2', type: GateType.ENTRY, description: 'Secondary entry gate for container trucks' },
-    { code: 'EG-03', name: 'Entry Gate 3', type: GateType.ENTRY, description: 'Visitor entry gate' },
-    { code: 'XG-01', name: 'Exit Gate 1', type: GateType.EXIT, description: 'Main exit gate for container trucks' },
-    { code: 'XG-02', name: 'Exit Gate 2', type: GateType.EXIT, description: 'Secondary exit gate' },
-    { code: 'XG-03', name: 'Exit Gate 3', type: GateType.EXIT, description: 'Visitor exit gate' },
+    {
+      code: 'EG-01',
+      name: 'Entry Gate 1',
+      type: GateType.ENTRY,
+      description: 'Main entry gate for container trucks',
+    },
+    {
+      code: 'EG-02',
+      name: 'Entry Gate 2',
+      type: GateType.ENTRY,
+      description: 'Secondary entry gate for container trucks',
+    },
+    {
+      code: 'EG-03',
+      name: 'Entry Gate 3',
+      type: GateType.ENTRY,
+      description: 'Visitor entry gate',
+    },
+    {
+      code: 'XG-01',
+      name: 'Exit Gate 1',
+      type: GateType.EXIT,
+      description: 'Main exit gate for container trucks',
+    },
+    {
+      code: 'XG-02',
+      name: 'Exit Gate 2',
+      type: GateType.EXIT,
+      description: 'Secondary exit gate',
+    },
+    {
+      code: 'XG-03',
+      name: 'Exit Gate 3',
+      type: GateType.EXIT,
+      description: 'Visitor exit gate',
+    },
   ];
 
   const createdGates: { [key: string]: string } = {};
@@ -45,6 +75,14 @@ async function bootstrap() {
   }
   console.log('✅ Default gates created');
 
+  // Collect all gate IDs for admin/supervisor assignment
+  const allGateIds = Object.values(createdGates);
+  const entryGateIds = [
+    createdGates['EG-01'],
+    createdGates['EG-02'],
+    createdGates['EG-03'],
+  ];
+
   // Create super admin user
   console.log('Creating super admin user...');
   const adminUsername = 'admin';
@@ -57,9 +95,9 @@ async function bootstrap() {
       password: 'admin123',
       fullName: 'Super Admin',
       roles: [Role.SUPER_ADMIN],
-      // Super admin doesn't need a specific gate
+      manageableGateIds: allGateIds,
     });
-    console.log('✅ Super admin created (admin / admin123)');
+    console.log('✅ Super admin created (admin / admin123) with all gates');
   } else {
     console.log('ℹ️ Admin user already exists');
   }
@@ -86,7 +124,8 @@ async function bootstrap() {
   // Create security officer user for XG-01
   console.log('Creating security officer user for XG-01...');
   const officerXgUsername = 'officer_xg01';
-  const existingOfficerXg = await usersService.findByUsername(officerXgUsername);
+  const existingOfficerXg =
+    await usersService.findByUsername(officerXgUsername);
 
   if (!existingOfficerXg) {
     await usersService.create({
@@ -105,7 +144,8 @@ async function bootstrap() {
   // Create supervisor user
   console.log('Creating supervisor user...');
   const supervisorUsername = 'supervisor';
-  const existingSupervisor = await usersService.findByUsername(supervisorUsername);
+  const existingSupervisor =
+    await usersService.findByUsername(supervisorUsername);
 
   if (!existingSupervisor) {
     await usersService.create({
@@ -114,8 +154,11 @@ async function bootstrap() {
       password: 'supervisor123',
       fullName: 'Terminal Supervisor',
       roles: [Role.SUPERVISOR],
+      manageableGateIds: entryGateIds,
     });
-    console.log('✅ Supervisor created (supervisor / supervisor123)');
+    console.log(
+      '✅ Supervisor created (supervisor / supervisor123) with entry gates',
+    );
   } else {
     console.log('ℹ️ Supervisor user already exists');
   }

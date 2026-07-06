@@ -51,6 +51,14 @@ export class User extends BaseEntity {
   @JoinColumn({ name: 'assigned_gate_id' })
   assignedGate: Gate | null;
 
+  @ManyToMany(() => Gate, { eager: true })
+  @JoinTable({
+    name: 'user_manageable_gates',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'gate_id', referencedColumnName: 'id' },
+  })
+  manageableGates: Gate[];
+
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword() {

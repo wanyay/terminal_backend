@@ -26,14 +26,21 @@ export class TrucksService {
     return paginate({
       source: this.containerTruckRepository,
       query: paginationQuery,
-      searchableFields: ['licensePlate', 'containerNumber', 'driverName', 'driverNrc'],
+      searchableFields: [
+        'licensePlate',
+        'containerNumber',
+        'driverName',
+        'driverNrc',
+      ],
       defaultSortBy: 'createdAt',
       relations: ['entryGate', 'exitGate'],
     });
   }
 
   async findOne(id: string): Promise<ContainerTruck> {
-    const truck = await this.containerTruckRepository.findOne({ where: { id } });
+    const truck = await this.containerTruckRepository.findOne({
+      where: { id },
+    });
     if (!truck) {
       throw new NotFoundException(`Container truck with ID ${id} not found`);
     }
@@ -68,7 +75,10 @@ export class TrucksService {
     return this.containerTruckRepository.save(truck);
   }
 
-  async registerExit(id: string, dto: RegisterTruckExitDto): Promise<ContainerTruck> {
+  async registerExit(
+    id: string,
+    dto: RegisterTruckExitDto,
+  ): Promise<ContainerTruck> {
     const truck = await this.findOne(id);
     truck.exitGateId = dto.exitGateId;
     truck.exitTime = new Date();
@@ -81,7 +91,10 @@ export class TrucksService {
     return this.containerTruckRepository.save(truck);
   }
 
-  async update(id: string, updateTruckDto: UpdateTruckDto): Promise<ContainerTruck> {
+  async update(
+    id: string,
+    updateTruckDto: UpdateTruckDto,
+  ): Promise<ContainerTruck> {
     const truck = await this.findOne(id);
     Object.assign(truck, updateTruckDto);
     return this.containerTruckRepository.save(truck);
@@ -98,9 +111,27 @@ export class TrucksService {
     await this.containerTruckRepository.softRemove(truck);
   }
 
-  async findAllActive(): Promise<ContainerTruck[]> {
-    return this.containerTruckRepository.find({
-      where: { status: TruckStatus.ENTERED },
+  async findAllActive(
+    paginationQuery: PaginationQueryDto,
+    gateId?: string,
+  ): Promise<PaginatedResult<ContainerTruck>> {
+    const where: any = { status: TruckStatus.ENTERED };
+
+    if (gateId) {
+      where.entryGateId = gateId;
+    }
+
+    return paginate({
+      source: this.containerTruckRepository,
+      query: paginationQuery,
+      searchableFields: [
+        'licensePlate',
+        'containerNumber',
+        'driverName',
+        'driverNrc',
+      ],
+      defaultSortBy: 'entryTime',
+      where,
       relations: ['entryGate', 'exitGate'],
     });
   }
