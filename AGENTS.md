@@ -42,7 +42,7 @@ Base Project:
 
 Database:
 
-- PostgreSQL
+- MySQL
 
 Authentication:
 

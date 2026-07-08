@@ -1,6 +1,6 @@
-# 🚀 NestJS Starter Kit (PostgreSQL + TypeORM + Auth)
+# 🚀 NestJS Starter Kit (MySQL + TypeORM + Auth)
 
-A **production-ready NestJS starter kit** built with **PostgreSQL**, **TypeORM**, and **JWT-based Authentication & Authorization**. This template is designed for scalability, security, and clean architecture, making it ideal for real-world backend applications and open-source projects.
+A **production-ready NestJS starter kit** built with **MySQL**, **TypeORM**, and **JWT-based Authentication & Authorization**. This template is designed for scalability, security, and clean architecture, making it ideal for real-world backend applications and open-source projects.
 
 ---
 
@@ -9,7 +9,7 @@ A **production-ready NestJS starter kit** built with **PostgreSQL**, **TypeORM**
 ### Core
 
 * ✅ NestJS (latest)
-* ✅ PostgreSQL
+* ✅ MySQL
 * ✅ TypeORM (entities, migrations, repositories)
 * ✅ Environment-based configuration
 * ✅ Modular & scalable architecture
@@ -83,7 +83,7 @@ src/
 ## 🧑‍💻 Tech Stack
 
 * **Framework**: NestJS
-* **Database**: PostgreSQL
+* **Database**: MySQL
 * **ORM**: TypeORM
 * **Auth**: JWT (Access & Refresh Tokens)
 * **Docs**: Swagger
@@ -121,9 +121,9 @@ NODE_ENV=development
 PORT=3000
 
 DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
+DB_PORT=3306
+DB_USERNAME=root
+DB_PASSWORD=root
 DB_NAME=nestjs_starter
 
 JWT_ACCESS_SECRET=access_secret

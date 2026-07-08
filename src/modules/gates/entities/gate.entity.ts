@@ -5,9 +5,6 @@ import { User } from '@/modules/users/entities/user.entity';
 
 @Entity('gates')
 export class Gate extends BaseEntity {
-  @Column({ unique: true })
-  code: string;
-
   @Column()
   name: string;
 

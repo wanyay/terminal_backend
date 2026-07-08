@@ -22,39 +22,33 @@ async function bootstrap() {
 
   // Create default gates
   console.log('Creating default gates...');
-  const defaultGates = [
+  const defaultGateNames = [
     {
-      code: 'EG-01',
       name: 'Entry Gate 1',
       type: GateType.ENTRY,
       description: 'Main entry gate for container trucks',
     },
     {
-      code: 'EG-02',
       name: 'Entry Gate 2',
       type: GateType.ENTRY,
       description: 'Secondary entry gate for container trucks',
     },
     {
-      code: 'EG-03',
       name: 'Entry Gate 3',
       type: GateType.ENTRY,
       description: 'Visitor entry gate',
     },
     {
-      code: 'XG-01',
       name: 'Exit Gate 1',
       type: GateType.EXIT,
       description: 'Main exit gate for container trucks',
     },
     {
-      code: 'XG-02',
       name: 'Exit Gate 2',
       type: GateType.EXIT,
       description: 'Secondary exit gate',
     },
     {
-      code: 'XG-03',
       name: 'Exit Gate 3',
       type: GateType.EXIT,
       description: 'Visitor exit gate',
@@ -62,15 +56,15 @@ async function bootstrap() {
   ];
 
   const createdGates: { [key: string]: string } = {};
-  for (const gateData of defaultGates) {
-    const existingGate = await gatesService.findByCode(gateData.code);
+  for (const gateData of defaultGateNames) {
+    const existingGate = await gatesService.findByName(gateData.name);
     if (!existingGate) {
       const createdGate = await gatesService.create(gateData);
-      createdGates[gateData.code] = createdGate.id;
-      console.log(`  ✅ Created gate: ${gateData.code}`);
+      createdGates[gateData.name] = createdGate.id;
+      console.log(`  ✅ Created gate: ${gateData.name}`);
     } else {
-      createdGates[gateData.code] = existingGate.id;
-      console.log(`  ℹ️ Gate already exists: ${gateData.code}`);
+      createdGates[gateData.name] = existingGate.id;
+      console.log(`  ℹ️ Gate already exists: ${gateData.name}`);
     }
   }
   console.log('✅ Default gates created');
@@ -78,9 +72,9 @@ async function bootstrap() {
   // Collect all gate IDs for admin/supervisor assignment
   const allGateIds = Object.values(createdGates);
   const entryGateIds = [
-    createdGates['EG-01'],
-    createdGates['EG-02'],
-    createdGates['EG-03'],
+    createdGates['Entry Gate 1'],
+    createdGates['Entry Gate 2'],
+    createdGates['Entry Gate 3'],
   ];
 
   // Create super admin user
@@ -102,8 +96,8 @@ async function bootstrap() {
     console.log('ℹ️ Admin user already exists');
   }
 
-  // Create security officer user for EG-01
-  console.log('Creating security officer user for EG-01...');
+  // Create security officer user for Entry Gate 1
+  console.log('Creating security officer user for Entry Gate 1...');
   const officerUsername = 'officer_eg01';
   const existingOfficer = await usersService.findByUsername(officerUsername);
 
@@ -114,15 +108,15 @@ async function bootstrap() {
       password: 'officer123',
       fullName: 'Security Officer EG01',
       roles: [Role.SECURITY_OFFICER],
-      assignedGateId: createdGates['EG-01'],
+      assignedGateId: createdGates['Entry Gate 1'],
     });
     console.log('✅ Security officer EG01 created (officer_eg01 / officer123)');
   } else {
     console.log('ℹ️ Security officer EG01 already exists');
   }
 
-  // Create security officer user for XG-01
-  console.log('Creating security officer user for XG-01...');
+  // Create security officer user for Exit Gate 1
+  console.log('Creating security officer user for Exit Gate 1...');
   const officerXgUsername = 'officer_xg01';
   const existingOfficerXg =
     await usersService.findByUsername(officerXgUsername);
@@ -134,7 +128,7 @@ async function bootstrap() {
       password: 'officer123',
       fullName: 'Security Officer XG01',
       roles: [Role.SECURITY_OFFICER],
-      assignedGateId: createdGates['XG-01'],
+      assignedGateId: createdGates['Exit Gate 1'],
     });
     console.log('✅ Security officer XG01 created (officer_xg01 / officer123)');
   } else {

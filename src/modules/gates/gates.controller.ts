@@ -41,13 +41,15 @@ export class GatesController {
   @Permissions(Permission.MANAGE_GATES)
   @ApiOperation({ summary: 'Create a new gate (Super Admin only)' })
   @ApiResponse({ status: 201, description: 'Gate created successfully' })
-  @ApiResponse({ status: 409, description: 'Gate code already exists' })
+  @ApiResponse({ status: 409, description: 'Gate name already exists' })
   create(@Body() createGateDto: CreateGateDto) {
     return this.gatesService.create(createGateDto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all gates with pagination, search, and sorting' })
+  @ApiOperation({
+    summary: 'Get all gates with pagination, search, and sorting',
+  })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'perPage', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })

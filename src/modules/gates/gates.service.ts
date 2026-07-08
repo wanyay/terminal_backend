@@ -20,11 +20,11 @@ export class GatesService {
 
   async create(createGateDto: CreateGateDto): Promise<Gate> {
     const existingGate = await this.gateRepository.findOne({
-      where: { code: createGateDto.code },
+      where: { name: createGateDto.name },
     });
     if (existingGate) {
       throw new ConflictException(
-        `Gate with code "${createGateDto.code}" already exists`,
+        `Gate with name "${createGateDto.name}" already exists`,
       );
     }
 
@@ -38,8 +38,8 @@ export class GatesService {
     return paginate({
       source: this.gateRepository,
       query: paginationQuery,
-      searchableFields: ['code', 'name', 'description'],
-      defaultSortBy: 'code',
+      searchableFields: ['name', 'description'],
+      defaultSortBy: 'name',
     });
   }
 
@@ -51,18 +51,18 @@ export class GatesService {
     return gate;
   }
 
-  async findByCode(code: string): Promise<Gate | null> {
-    return this.gateRepository.findOne({ where: { code } });
+  async findByName(name: string): Promise<Gate | null> {
+    return this.gateRepository.findOne({ where: { name } });
   }
 
   async update(id: string, updateGateDto: UpdateGateDto): Promise<Gate> {
     const gate = await this.findOne(id);
 
-    if (updateGateDto.code && updateGateDto.code !== gate.code) {
-      const existingGate = await this.findByCode(updateGateDto.code);
+    if (updateGateDto.name && updateGateDto.name !== gate.name) {
+      const existingGate = await this.findByName(updateGateDto.name);
       if (existingGate) {
         throw new ConflictException(
-          `Gate with code "${updateGateDto.code}" already exists`,
+          `Gate with name "${updateGateDto.name}" already exists`,
         );
       }
     }

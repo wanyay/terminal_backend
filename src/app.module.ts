@@ -13,6 +13,7 @@ import { VisitorsModule } from '@/modules/visitors/visitors.module';
 import { VehiclesModule } from '@/modules/vehicles/vehicles.module';
 import { AuditLogsModule } from '@/modules/audit-logs/audit-logs.module';
 import { HealthModule } from '@/modules/health/health.module';
+import { DashboardModule } from '@/modules/dashboard/dashboard.module';
 import { RequestContextMiddleware } from '@/shared/middleware/request-context.middleware';
 
 @Module({
@@ -44,6 +45,7 @@ import { RequestContextMiddleware } from '@/shared/middleware/request-context.mi
     VehiclesModule,
     AuditLogsModule,
     HealthModule,
+    DashboardModule,
   ],
   providers: [
     {
