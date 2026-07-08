@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThanOrEqual, LessThanOrEqual, Between } from 'typeorm';
 import { ContainerTruck } from './entities/container-truck.entity';
 import {
   CreateTruckDto,
   UpdateTruckDto,
   RegisterTruckEntryDto,
   RegisterTruckExitDto,
+  TrucksQueryDto,
 } from './dto';
 import { PaginationQueryDto } from '@/shared/dto/pagination-query.dto';
 import { PaginatedResult } from '@/shared/interfaces/paginated-result.interface';
@@ -21,11 +22,32 @@ export class TrucksService {
   ) {}
 
   async findAll(
-    paginationQuery: PaginationQueryDto,
+    query: TrucksQueryDto,
   ): Promise<PaginatedResult<ContainerTruck>> {
+    const where: any = {};
+
+    if (query.startDate && query.endDate) {
+      where.createdAt = Between(
+        new Date(query.startDate),
+        new Date(query.endDate),
+      );
+    } else if (query.startDate) {
+      where.createdAt = MoreThanOrEqual(new Date(query.startDate));
+    } else if (query.endDate) {
+      where.createdAt = LessThanOrEqual(new Date(query.endDate));
+    }
+
+    if (query.entryGateId) {
+      where.entryGateId = query.entryGateId;
+    }
+
+    if (query.exitGateId) {
+      where.exitGateId = query.exitGateId;
+    }
+
     return paginate({
       source: this.containerTruckRepository,
-      query: paginationQuery,
+      query,
       searchableFields: [
         'licensePlate',
         'containerNumber',
@@ -34,6 +56,7 @@ export class TrucksService {
       ],
       defaultSortBy: 'createdAt',
       relations: ['entryGate', 'exitGate'],
+      where,
     });
   }
 

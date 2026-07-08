@@ -25,6 +25,8 @@ import {
   UpdateVehicleDto,
   RegisterVehicleEntryDto,
   RegisterVehicleExitDto,
+  ActiveVehiclesQueryDto,
+  VehiclesQueryDto,
 } from './dto';
 import { JwtAuthGuard } from '@/shared/guards/jwt-auth.guard';
 import { RolesGuard } from '@/shared/guards/roles.guard';
@@ -53,27 +55,37 @@ export class VehiclesController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all visiting vehicles with pagination, search, and sorting' })
+  @ApiOperation({
+    summary:
+      'Get all visiting vehicles with pagination, search, sorting, and filters',
+  })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'perPage', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'sortBy', required: false, type: String })
   @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
-  @ApiResponse({ status: 200, description: 'Return paginated visiting vehicles' })
-  findAll(@Query() paginationQuery: PaginationQueryDto) {
-    return this.vehiclesService.findAll(paginationQuery);
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
+  @ApiQuery({ name: 'entryGateId', required: false, type: String })
+  @ApiQuery({ name: 'exitGateId', required: false, type: String })
+  @ApiResponse({
+    status: 200,
+    description: 'Return paginated visiting vehicles',
+  })
+  findAll(@Query() query: VehiclesQueryDto) {
+    return this.vehiclesService.findAll(query);
   }
 
   @Get('active')
-  @ApiOperation({ summary: 'Get all actively entered visiting vehicles' })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'perPage', required: false, type: Number })
-  @ApiQuery({ name: 'search', required: false, type: String })
-  @ApiQuery({ name: 'sortBy', required: false, type: String })
-  @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
-  @ApiResponse({ status: 200, description: 'Return paginated active visiting vehicles' })
-  findAllActive(@Query() paginationQuery: PaginationQueryDto) {
-    return this.vehiclesService.findAllActive(paginationQuery);
+  @ApiOperation({
+    summary: 'Get all actively entered visiting vehicles with pagination',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return paginated active visiting vehicles',
+  })
+  findAllActive(@Query() query: ActiveVehiclesQueryDto) {
+    return this.vehiclesService.findAllActive(query, query.gateId);
   }
 
   @Get(':id')
@@ -89,7 +101,10 @@ export class VehiclesController {
   @Roles(Role.SUPER_ADMIN, Role.SECURITY_OFFICER)
   @Permissions(Permission.REGISTER_ENTRY)
   @ApiOperation({ summary: 'Register a visiting vehicle entry' })
-  @ApiResponse({ status: 201, description: 'Vehicle entry registered successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Vehicle entry registered successfully',
+  })
   registerEntry(@Body() dto: RegisterVehicleEntryDto) {
     return this.vehiclesService.registerEntry(dto);
   }
@@ -99,7 +114,10 @@ export class VehiclesController {
   @Roles(Role.SUPER_ADMIN, Role.SECURITY_OFFICER)
   @Permissions(Permission.REGISTER_EXIT)
   @ApiOperation({ summary: 'Register a visiting vehicle exit' })
-  @ApiResponse({ status: 200, description: 'Vehicle exit registered successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Vehicle exit registered successfully',
+  })
   @ApiResponse({ status: 400, description: 'Vehicle is not in ENTERED status' })
   @ApiResponse({ status: 404, description: 'Vehicle not found' })
   registerExit(

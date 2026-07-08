@@ -1,15 +1,13 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThanOrEqual, LessThanOrEqual, Between } from 'typeorm';
 import { Visitor } from './entities/visitor.entity';
 import {
   CreateVisitorDto,
   UpdateVisitorDto,
   RegisterVisitorEntryDto,
   RegisterVisitorExitDto,
+  VisitorsQueryDto,
 } from './dto';
 import { PaginationQueryDto } from '@/shared/dto/pagination-query.dto';
 import { PaginatedResult } from '@/shared/interfaces/paginated-result.interface';
@@ -28,15 +26,40 @@ export class VisitorsService {
     return this.visitorRepository.save(visitor);
   }
 
-  async findAll(
-    paginationQuery: PaginationQueryDto,
-  ): Promise<PaginatedResult<Visitor>> {
+  async findAll(query: VisitorsQueryDto): Promise<PaginatedResult<Visitor>> {
+    const where: any = {};
+
+    if (query.startDate && query.endDate) {
+      where.createdAt = Between(
+        new Date(query.startDate),
+        new Date(query.endDate),
+      );
+    } else if (query.startDate) {
+      where.createdAt = MoreThanOrEqual(new Date(query.startDate));
+    } else if (query.endDate) {
+      where.createdAt = LessThanOrEqual(new Date(query.endDate));
+    }
+
+    if (query.entryGateId) {
+      where.entryGateId = query.entryGateId;
+    }
+
+    if (query.exitGateId) {
+      where.exitGateId = query.exitGateId;
+    }
+
     return paginate({
       source: this.visitorRepository,
-      query: paginationQuery,
-      searchableFields: ['visitorName', 'nrcOrPassport', 'companyName', 'hostEmployee'],
+      query,
+      searchableFields: [
+        'visitorName',
+        'nrcOrPassport',
+        'companyName',
+        'hostEmployee',
+      ],
       defaultSortBy: 'createdAt',
       relations: ['entryGate', 'exitGate'],
+      where,
     });
   }
 
@@ -90,7 +113,10 @@ export class VisitorsService {
     return this.visitorRepository.save(visitor);
   }
 
-  async update(id: string, updateVisitorDto: UpdateVisitorDto): Promise<Visitor> {
+  async update(
+    id: string,
+    updateVisitorDto: UpdateVisitorDto,
+  ): Promise<Visitor> {
     const visitor = await this.findOne(id);
     Object.assign(visitor, updateVisitorDto);
     return this.visitorRepository.save(visitor);
@@ -120,7 +146,12 @@ export class VisitorsService {
     return paginate({
       source: this.visitorRepository,
       query: paginationQuery,
-      searchableFields: ['visitorName', 'nrcOrPassport', 'companyName', 'hostEmployee'],
+      searchableFields: [
+        'visitorName',
+        'nrcOrPassport',
+        'companyName',
+        'hostEmployee',
+      ],
       defaultSortBy: 'entryTime',
       where: { status: TruckStatus.ENTERED },
       relations: ['entryGate', 'exitGate'],

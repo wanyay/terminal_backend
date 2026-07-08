@@ -4,13 +4,14 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThanOrEqual, LessThanOrEqual, Between } from 'typeorm';
 import { VisitingVehicle } from './entities/visiting-vehicle.entity';
 import {
   CreateVehicleDto,
   UpdateVehicleDto,
   RegisterVehicleEntryDto,
   RegisterVehicleExitDto,
+  VehiclesQueryDto,
 } from './dto';
 import { PaginationQueryDto } from '@/shared/dto/pagination-query.dto';
 import { PaginatedResult } from '@/shared/interfaces/paginated-result.interface';
@@ -30,11 +31,32 @@ export class VehiclesService {
   }
 
   async findAll(
-    paginationQuery: PaginationQueryDto,
+    query: VehiclesQueryDto,
   ): Promise<PaginatedResult<VisitingVehicle>> {
+    const where: any = {};
+
+    if (query.startDate && query.endDate) {
+      where.createdAt = Between(
+        new Date(query.startDate),
+        new Date(query.endDate),
+      );
+    } else if (query.startDate) {
+      where.createdAt = MoreThanOrEqual(new Date(query.startDate));
+    } else if (query.endDate) {
+      where.createdAt = LessThanOrEqual(new Date(query.endDate));
+    }
+
+    if (query.entryGateId) {
+      where.entryGateId = query.entryGateId;
+    }
+
+    if (query.exitGateId) {
+      where.exitGateId = query.exitGateId;
+    }
+
     return paginate({
       source: this.vehicleRepository,
-      query: paginationQuery,
+      query,
       searchableFields: [
         'plateNumber',
         'vehicleType',
@@ -44,12 +66,20 @@ export class VehiclesService {
       ],
       defaultSortBy: 'createdAt',
       relations: ['entryGate', 'exitGate'],
+      where,
     });
   }
 
   async findAllActive(
     paginationQuery: PaginationQueryDto,
+    gateId?: string,
   ): Promise<PaginatedResult<VisitingVehicle>> {
+    const where: any = { status: TruckStatus.ENTERED };
+
+    if (gateId) {
+      where.entryGateId = gateId;
+    }
+
     return paginate({
       source: this.vehicleRepository,
       query: paginationQuery,
@@ -60,8 +90,8 @@ export class VehiclesService {
         'companyName',
         'nrcOrLicense',
       ],
-      defaultSortBy: 'createdAt',
-      where: { status: TruckStatus.ENTERED },
+      defaultSortBy: 'entryTime',
+      where,
       relations: ['entryGate', 'exitGate'],
     });
   }
@@ -77,9 +107,7 @@ export class VehiclesService {
     return vehicle;
   }
 
-  async registerEntry(
-    dto: RegisterVehicleEntryDto,
-  ): Promise<VisitingVehicle> {
+  async registerEntry(dto: RegisterVehicleEntryDto): Promise<VisitingVehicle> {
     const vehicle = this.vehicleRepository.create({
       ...dto,
       entryTime: new Date(),

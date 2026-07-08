@@ -25,6 +25,7 @@ import {
   UpdateVisitorDto,
   RegisterVisitorEntryDto,
   RegisterVisitorExitDto,
+  VisitorsQueryDto,
 } from './dto';
 import { JwtAuthGuard } from '@/shared/guards/jwt-auth.guard';
 import { RolesGuard } from '@/shared/guards/roles.guard';
@@ -56,16 +57,22 @@ export class VisitorsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all visitors with pagination, search, and sorting' })
+  @ApiOperation({
+    summary: 'Get all visitors with pagination, search, sorting, and filters',
+  })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'perPage', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'sortBy', required: false, type: String })
   @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
+  @ApiQuery({ name: 'entryGateId', required: false, type: String })
+  @ApiQuery({ name: 'exitGateId', required: false, type: String })
   @ApiResponse({ status: 200, description: 'Return paginated visitors' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  findAll(@Query() paginationQuery: PaginationQueryDto) {
-    return this.visitorsService.findAll(paginationQuery);
+  findAll(@Query() query: VisitorsQueryDto) {
+    return this.visitorsService.findAll(query);
   }
 
   @Get('active')
@@ -95,7 +102,10 @@ export class VisitorsController {
   @Roles(Role.SUPER_ADMIN, Role.SECURITY_OFFICER)
   @Permissions(Permission.REGISTER_ENTRY)
   @ApiOperation({ summary: 'Register a visitor entry' })
-  @ApiResponse({ status: 201, description: 'Visitor entry registered successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Visitor entry registered successfully',
+  })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -108,10 +118,16 @@ export class VisitorsController {
   @Roles(Role.SUPER_ADMIN, Role.SECURITY_OFFICER)
   @Permissions(Permission.REGISTER_EXIT)
   @ApiOperation({ summary: 'Register a visitor exit' })
-  @ApiResponse({ status: 200, description: 'Visitor exit registered successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Visitor exit registered successfully',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'Visitor not found or not currently entered' })
+  @ApiResponse({
+    status: 404,
+    description: 'Visitor not found or not currently entered',
+  })
   registerExit(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() registerVisitorExitDto: RegisterVisitorExitDto,
@@ -128,7 +144,10 @@ export class VisitorsController {
   @ApiResponse({ status: 200, description: 'Visitor cancelled successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'Visitor not found or already exited' })
+  @ApiResponse({
+    status: 404,
+    description: 'Visitor not found or already exited',
+  })
   cancel(@Param('id', ParseUUIDPipe) id: string) {
     return this.visitorsService.cancel(id);
   }

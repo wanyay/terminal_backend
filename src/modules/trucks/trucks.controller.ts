@@ -26,6 +26,7 @@ import {
   RegisterTruckEntryDto,
   RegisterTruckExitDto,
   ActiveTrucksQueryDto,
+  TrucksQueryDto,
 } from './dto';
 import { JwtAuthGuard } from '@/shared/guards/jwt-auth.guard';
 import { RolesGuard } from '@/shared/guards/roles.guard';
@@ -58,19 +59,24 @@ export class TrucksController {
 
   @Get()
   @ApiOperation({
-    summary: 'Get all container trucks with pagination, search, and sorting',
+    summary:
+      'Get all container trucks with pagination, search, sorting, and filters',
   })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'perPage', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'sortBy', required: false, type: String })
   @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
+  @ApiQuery({ name: 'entryGateId', required: false, type: String })
+  @ApiQuery({ name: 'exitGateId', required: false, type: String })
   @ApiResponse({
     status: 200,
     description: 'Return paginated container trucks',
   })
-  findAll(@Query() paginationQuery: PaginationQueryDto) {
-    return this.trucksService.findAll(paginationQuery);
+  findAll(@Query() query: TrucksQueryDto) {
+    return this.trucksService.findAll(query);
   }
 
   @Get('active')
