@@ -17,12 +17,15 @@ import { PaginationQueryDto } from '@/shared/dto/pagination-query.dto';
 import { PaginatedResult } from '@/shared/interfaces/paginated-result.interface';
 import { paginate } from '@/shared/helpers/paginate';
 import { TruckStatus } from '@/modules/trucks/enums/truck-status.enum';
+import { BlacklistService } from '@/modules/blacklist/blacklist.service';
+import { BlacklistType } from '@/modules/blacklist/enums/blacklist-type.enum';
 
 @Injectable()
 export class VehiclesService {
   constructor(
     @InjectRepository(VisitingVehicle)
     private readonly vehicleRepository: Repository<VisitingVehicle>,
+    private readonly blacklistService: BlacklistService,
   ) {}
 
   async create(createVehicleDto: CreateVehicleDto): Promise<VisitingVehicle> {
@@ -36,14 +39,15 @@ export class VehiclesService {
     const where: any = {};
 
     if (query.startDate && query.endDate) {
-      where.createdAt = Between(
-        new Date(query.startDate),
-        new Date(query.endDate),
-      );
+      const endDate = new Date(query.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      where.createdAt = Between(new Date(query.startDate), endDate);
     } else if (query.startDate) {
       where.createdAt = MoreThanOrEqual(new Date(query.startDate));
     } else if (query.endDate) {
-      where.createdAt = LessThanOrEqual(new Date(query.endDate));
+      const endDate = new Date(query.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      where.createdAt = LessThanOrEqual(endDate);
     }
 
     if (query.entryGateId) {
@@ -108,6 +112,30 @@ export class VehiclesService {
   }
 
   async registerEntry(dto: RegisterVehicleEntryDto): Promise<VisitingVehicle> {
+    // Check if license plate is blacklisted
+    const isPlateBlacklisted = await this.blacklistService.checkBlocked(
+      BlacklistType.LICENSE_PLATE,
+      dto.plateNumber,
+    );
+    if (isPlateBlacklisted) {
+      throw new BadRequestException(
+        `Vehicle with license plate ${dto.plateNumber} is blacklisted and cannot enter the port.`,
+      );
+    }
+
+    // Check if NRC/License is blacklisted
+    if (dto.nrcOrLicense) {
+      const isNrcBlacklisted = await this.blacklistService.checkBlocked(
+        BlacklistType.NRC_PASSPORT,
+        dto.nrcOrLicense,
+      );
+      if (isNrcBlacklisted) {
+        throw new BadRequestException(
+          `Visitor with NRC/Passport ${dto.nrcOrLicense} is blacklisted and cannot enter the port.`,
+        );
+      }
+    }
+
     const vehicle = this.vehicleRepository.create({
       ...dto,
       entryTime: new Date(),

@@ -9,6 +9,8 @@ import {
   Query,
   UseGuards,
   ParseUUIDPipe,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -35,10 +37,10 @@ export class UsersController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.SUPERVISOR)
   @Permissions(Permission.MANAGE_USERS)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Create a new user (Super Admin only)' })
+  @ApiOperation({ summary: 'Create a new user' })
   @ApiResponse({ status: 201, description: 'User created successfully' })
   @ApiResponse({ status: 409, description: 'Username already exists' })
   create(@Body() createUserDto: CreateUserDto) {
@@ -47,7 +49,7 @@ export class UsersController {
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.SUPERVISOR)
   @Permissions(Permission.MANAGE_USERS)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
@@ -75,10 +77,10 @@ export class UsersController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.SUPERVISOR)
   @Permissions(Permission.MANAGE_USERS)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Update user (Super Admin only)' })
+  @ApiOperation({ summary: 'Update user' })
   @ApiResponse({ status: 200, description: 'User updated successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
   update(
@@ -98,5 +100,31 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'User not found' })
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.remove(id);
+  }
+
+  @Post(':id/activate')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
+  @Roles(Role.SUPER_ADMIN, Role.SUPERVISOR)
+  @Permissions(Permission.MANAGE_USERS)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Activate user account' })
+  @ApiResponse({ status: 200, description: 'User activated successfully' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  activate(@Param('id', ParseUUIDPipe) id: string) {
+    return this.usersService.activate(id);
+  }
+
+  @Post(':id/deactivate')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
+  @Roles(Role.SUPER_ADMIN, Role.SUPERVISOR)
+  @Permissions(Permission.MANAGE_USERS)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Deactivate user account' })
+  @ApiResponse({ status: 200, description: 'User deactivated successfully' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  deactivate(@Param('id', ParseUUIDPipe) id: string) {
+    return this.usersService.deactivate(id);
   }
 }

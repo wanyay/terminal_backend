@@ -53,12 +53,16 @@ export class RolesService {
       {
         name: Role.SUPERVISOR,
         description:
-          'View dashboard, view and export reports, search records. Cannot modify historical records',
+          'View dashboard, view and export reports, search records, manage users/gates/blacklist (no delete), view audit logs. Cannot modify historical records',
         permissions: [
           Permission.VIEW_DASHBOARD,
           Permission.VIEW_REPORTS,
           Permission.EXPORT_REPORTS,
           Permission.SEARCH_RECORDS,
+          Permission.MANAGE_USERS,
+          Permission.MANAGE_GATES,
+          Permission.MANAGE_BLACKLIST,
+          Permission.VIEW_AUDIT_LOGS,
         ],
       },
       {
@@ -122,6 +126,11 @@ export class RolesService {
       {
         name: Permission.MANAGE_GATES,
         description: 'Create, update, delete, and view entry/exit gates',
+      },
+      {
+        name: Permission.MANAGE_BLACKLIST,
+        description:
+          'Manage blacklist entries for license plates and NRC/Passports',
       },
       {
         name: Permission.REGISTER_ENTRY,

@@ -46,7 +46,7 @@ export class TrucksController {
 
   @Post()
   @UseGuards(RolesGuard, PermissionsGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.SUPERVISOR)
   @Permissions(Permission.MANAGE_USERS)
   @ApiOperation({ summary: 'Create a new container truck record' })
   @ApiResponse({ status: 201, description: 'Truck created successfully' })
@@ -132,7 +132,7 @@ export class TrucksController {
   @Post(':id/cancel')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RolesGuard, PermissionsGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.SUPERVISOR)
   @Permissions(Permission.MANAGE_USERS)
   @ApiOperation({ summary: 'Cancel a container truck record' })
   @ApiResponse({ status: 200, description: 'Truck cancelled successfully' })
@@ -145,7 +145,7 @@ export class TrucksController {
 
   @Patch(':id')
   @UseGuards(RolesGuard, PermissionsGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.SUPERVISOR)
   @Permissions(Permission.MANAGE_USERS)
   @ApiOperation({ summary: 'Update a container truck record' })
   @ApiResponse({ status: 200, description: 'Truck updated successfully' })

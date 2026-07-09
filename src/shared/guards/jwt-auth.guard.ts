@@ -37,6 +37,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       throw err || new UnauthorizedException('Invalid or expired token');
     }
 
+    // Check if user is active
+    const isActive = (user as any)?.isActive;
+    if (isActive === false) {
+      throw new UnauthorizedException(
+        'Your account has been deactivated. Please contact an administrator.',
+      );
+    }
+
     // Check if user must change password
     const mustChangePassword = (user as any)?.mustChangePassword;
     if (mustChangePassword === true) {

@@ -37,9 +37,9 @@ export class GatesController {
 
   @Post()
   @UseGuards(RolesGuard, PermissionsGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.SUPERVISOR)
   @Permissions(Permission.MANAGE_GATES)
-  @ApiOperation({ summary: 'Create a new gate (Super Admin only)' })
+  @ApiOperation({ summary: 'Create a new gate' })
   @ApiResponse({ status: 201, description: 'Gate created successfully' })
   @ApiResponse({ status: 409, description: 'Gate name already exists' })
   create(@Body() createGateDto: CreateGateDto) {
@@ -70,9 +70,9 @@ export class GatesController {
 
   @Patch(':id')
   @UseGuards(RolesGuard, PermissionsGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.SUPERVISOR)
   @Permissions(Permission.MANAGE_GATES)
-  @ApiOperation({ summary: 'Update gate (Super Admin only)' })
+  @ApiOperation({ summary: 'Update gate' })
   @ApiResponse({ status: 200, description: 'Gate updated successfully' })
   @ApiResponse({ status: 404, description: 'Gate not found' })
   update(

@@ -12,6 +12,7 @@ import { TrucksModule } from '@/modules/trucks/trucks.module';
 import { VisitorsModule } from '@/modules/visitors/visitors.module';
 import { VehiclesModule } from '@/modules/vehicles/vehicles.module';
 import { AuditLogsModule } from '@/modules/audit-logs/audit-logs.module';
+import { BlacklistModule } from '@/modules/blacklist/blacklist.module';
 import { HealthModule } from '@/modules/health/health.module';
 import { DashboardModule } from '@/modules/dashboard/dashboard.module';
 import { RequestContextMiddleware } from '@/shared/middleware/request-context.middleware';
@@ -44,6 +45,7 @@ import { RequestContextMiddleware } from '@/shared/middleware/request-context.mi
     VisitorsModule,
     VehiclesModule,
     AuditLogsModule,
+    BlacklistModule,
     HealthModule,
     DashboardModule,
   ],

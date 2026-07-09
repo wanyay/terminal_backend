@@ -3,8 +3,14 @@ import { AppModule } from '@/app.module';
 import { RolesService } from '@/modules/roles/roles.service';
 import { UsersService } from '@/modules/users/users.service';
 import { GatesService } from '@/modules/gates/gates.service';
+import { BlacklistService } from '@/modules/blacklist/blacklist.service';
+import { TrucksService } from '@/modules/trucks/trucks.service';
+import { VehiclesService } from '@/modules/vehicles/vehicles.service';
+import { VisitorsService } from '@/modules/visitors/visitors.service';
 import { Role } from '@/modules/roles/enums/role.enum';
 import { GateType } from '@/modules/gates/enums/gate-type.enum';
+import { BlacklistType } from '@/modules/blacklist/enums/blacklist-type.enum';
+import { TruckStatus } from '@/modules/trucks/enums/truck-status.enum';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
@@ -12,6 +18,10 @@ async function bootstrap() {
   const rolesService = app.get(RolesService);
   const usersService = app.get(UsersService);
   const gatesService = app.get(GatesService);
+  const blacklistService = app.get(BlacklistService);
+  const trucksService = app.get(TrucksService);
+  const vehiclesService = app.get(VehiclesService);
+  const visitorsService = app.get(VisitorsService);
 
   console.log('🌱 Running database seeds...');
 
@@ -155,6 +165,159 @@ async function bootstrap() {
     );
   } else {
     console.log('ℹ️ Supervisor user already exists');
+  }
+
+  // Create sample blacklist entries
+  console.log('Creating sample blacklist entries...');
+  const blacklistEntries = [
+    {
+      type: BlacklistType.LICENSE_PLATE,
+      value: 'YGN/EE-9999',
+      reason: 'Stolen vehicle',
+      blockedBy: 'admin',
+    },
+    {
+      type: BlacklistType.LICENSE_PLATE,
+      value: 'MDY/AA-8888',
+      reason: 'Unauthorized access attempt',
+      blockedBy: 'admin',
+    },
+    {
+      type: BlacklistType.NRC_PASSPORT,
+      value: '12/ABC(N)999999',
+      reason: 'Previous security violation',
+      blockedBy: 'admin',
+    },
+  ];
+
+  for (const entry of blacklistEntries) {
+    try {
+      await blacklistService.create(entry);
+      console.log(`  ✅ Blacklisted: ${entry.type} - ${entry.value}`);
+    } catch (error) {
+      console.log(`  ℹ️ Blacklist entry already exists: ${entry.value}`);
+    }
+  }
+
+  // Create sample container trucks
+  console.log('Creating sample container trucks...');
+  const sampleTrucks = [
+    {
+      licensePlate: 'YGN/EE-1234',
+      containerNumber: 'CNTR-001234',
+      driverName: 'Aung Aung',
+      driverNrc: '12/ABC(N)123456',
+      entryGateId: createdGates['Entry Gate 1'],
+      status: TruckStatus.ENTERED,
+      entryTime: new Date(),
+    },
+    {
+      licensePlate: 'MDY/BB-5678',
+      containerNumber: 'CNTR-005678',
+      driverName: 'Kyaw Kyaw',
+      driverNrc: '9/DEF(N)654321',
+      entryGateId: createdGates['Entry Gate 2'],
+      exitGateId: createdGates['Exit Gate 1'],
+      status: TruckStatus.EXITED,
+      entryTime: new Date(Date.now() - 2 * 60 * 60 * 1000),
+      exitTime: new Date(Date.now() - 1 * 60 * 60 * 1000),
+    },
+    {
+      licensePlate: 'NPT/CC-9012',
+      containerNumber: 'CNTR-009012',
+      driverName: 'Tun Tun',
+      driverNrc: '3/GHI(N)789012',
+      entryGateId: createdGates['Entry Gate 3'],
+      status: TruckStatus.ENTERED,
+      entryTime: new Date(Date.now() - 30 * 60 * 1000),
+    },
+  ];
+
+  for (const truckData of sampleTrucks) {
+    try {
+      await trucksService.create(truckData);
+      console.log(`  ✅ Truck created: ${truckData.licensePlate}`);
+    } catch (error) {
+      console.log(`  ℹ️ Truck already exists: ${truckData.licensePlate}`);
+    }
+  }
+
+  // Create sample visiting vehicles
+  console.log('Creating sample visiting vehicles...');
+  const sampleVehicles = [
+    {
+      plateNumber: 'YGN/KA-3456',
+      vehicleType: 'Sedan',
+      vehicleModel: 'Toyota Camry',
+      visitorName: 'John Smith',
+      nrcOrLicense: '12/ABC(N)345678',
+      companyName: 'ABC Logistics',
+      purposeOfVisit: 'Business meeting',
+      entryGateId: createdGates['Entry Gate 3'],
+      status: TruckStatus.ENTERED,
+      entryTime: new Date(),
+    },
+    {
+      plateNumber: 'MDY/KB-7890',
+      vehicleType: 'SUV',
+      vehicleModel: 'Honda CR-V',
+      visitorName: 'Jane Doe',
+      nrcOrLicense: '9/DEF(N)456789',
+      companyName: 'XYZ Trading',
+      purposeOfVisit: 'Site inspection',
+      entryGateId: createdGates['Entry Gate 3'],
+      exitGateId: createdGates['Exit Gate 3'],
+      status: TruckStatus.EXITED,
+      entryTime: new Date(Date.now() - 3 * 60 * 60 * 1000),
+      exitTime: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    },
+  ];
+
+  for (const vehicleData of sampleVehicles) {
+    try {
+      await vehiclesService.create(vehicleData);
+      console.log(`  ✅ Vehicle created: ${vehicleData.plateNumber}`);
+    } catch (error) {
+      console.log(`  ℹ️ Vehicle already exists: ${vehicleData.plateNumber}`);
+    }
+  }
+
+  // Create sample visitors
+  console.log('Creating sample visitors...');
+  const sampleVisitors = [
+    {
+      visitorName: 'Michael Johnson',
+      nrcOrPassport: '12/ABC(N)111222',
+      phoneNumber: '+959123456789',
+      companyName: 'Global Shipping',
+      purposeOfVisit: 'Cargo inspection',
+      hostEmployee: 'Mr. Manager',
+      entryGateId: createdGates['Entry Gate 3'],
+      status: TruckStatus.ENTERED,
+      entryTime: new Date(),
+    },
+    {
+      visitorName: 'Sarah Williams',
+      nrcOrPassport: '9/DEF(N)333444',
+      phoneNumber: '+959987654321',
+      companyName: 'Port Authority',
+      purposeOfVisit: 'Audit visit',
+      hostEmployee: 'Ms. Director',
+      entryGateId: createdGates['Entry Gate 3'],
+      exitGateId: createdGates['Exit Gate 3'],
+      status: TruckStatus.EXITED,
+      entryTime: new Date(Date.now() - 4 * 60 * 60 * 1000),
+      exitTime: new Date(Date.now() - 3 * 60 * 60 * 1000),
+    },
+  ];
+
+  for (const visitorData of sampleVisitors) {
+    try {
+      await visitorsService.create(visitorData);
+      console.log(`  ✅ Visitor created: ${visitorData.visitorName}`);
+    } catch (error) {
+      console.log(`  ℹ️ Visitor already exists: ${visitorData.visitorName}`);
+    }
   }
 
   console.log('🎉 Database seeding completed!');

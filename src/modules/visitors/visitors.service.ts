@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual, LessThanOrEqual, Between } from 'typeorm';
 import { Visitor } from './entities/visitor.entity';
@@ -13,12 +17,15 @@ import { PaginationQueryDto } from '@/shared/dto/pagination-query.dto';
 import { PaginatedResult } from '@/shared/interfaces/paginated-result.interface';
 import { paginate } from '@/shared/helpers/paginate';
 import { TruckStatus } from '@/modules/trucks/enums/truck-status.enum';
+import { BlacklistService } from '@/modules/blacklist/blacklist.service';
+import { BlacklistType } from '@/modules/blacklist/enums/blacklist-type.enum';
 
 @Injectable()
 export class VisitorsService {
   constructor(
     @InjectRepository(Visitor)
     private readonly visitorRepository: Repository<Visitor>,
+    private readonly blacklistService: BlacklistService,
   ) {}
 
   async create(createVisitorDto: CreateVisitorDto): Promise<Visitor> {
@@ -30,14 +37,15 @@ export class VisitorsService {
     const where: any = {};
 
     if (query.startDate && query.endDate) {
-      where.createdAt = Between(
-        new Date(query.startDate),
-        new Date(query.endDate),
-      );
+      const endDate = new Date(query.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      where.createdAt = Between(new Date(query.startDate), endDate);
     } else if (query.startDate) {
       where.createdAt = MoreThanOrEqual(new Date(query.startDate));
     } else if (query.endDate) {
-      where.createdAt = LessThanOrEqual(new Date(query.endDate));
+      const endDate = new Date(query.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      where.createdAt = LessThanOrEqual(endDate);
     }
 
     if (query.entryGateId) {
@@ -79,6 +87,19 @@ export class VisitorsService {
   async registerEntry(
     registerVisitorEntryDto: RegisterVisitorEntryDto,
   ): Promise<Visitor> {
+    // Check if NRC/Passport is blacklisted
+    if (registerVisitorEntryDto.nrcOrPassport) {
+      const isNrcBlacklisted = await this.blacklistService.checkBlocked(
+        BlacklistType.NRC_PASSPORT,
+        registerVisitorEntryDto.nrcOrPassport,
+      );
+      if (isNrcBlacklisted) {
+        throw new BadRequestException(
+          `Visitor with NRC/Passport ${registerVisitorEntryDto.nrcOrPassport} is blacklisted and cannot enter the port.`,
+        );
+      }
+    }
+
     const visitor = this.visitorRepository.create({
       ...registerVisitorEntryDto,
       status: TruckStatus.ENTERED,

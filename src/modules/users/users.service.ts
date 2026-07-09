@@ -184,4 +184,17 @@ export class UsersService {
   async save(user: User): Promise<User> {
     return this.userRepository.save(user);
   }
+
+  async activate(id: string): Promise<User> {
+    const user = await this.findOne(id);
+    user.isActive = true;
+    return this.userRepository.save(user);
+  }
+
+  async deactivate(id: string): Promise<User> {
+    const user = await this.findOne(id);
+    user.isActive = false;
+    user.refreshToken = null;
+    return this.userRepository.save(user);
+  }
 }

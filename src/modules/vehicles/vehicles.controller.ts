@@ -46,7 +46,7 @@ export class VehiclesController {
 
   @Post()
   @UseGuards(RolesGuard, PermissionsGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.SUPERVISOR)
   @Permissions(Permission.MANAGE_USERS)
   @ApiOperation({ summary: 'Create a new visiting vehicle record' })
   @ApiResponse({ status: 201, description: 'Vehicle created successfully' })
@@ -130,7 +130,7 @@ export class VehiclesController {
   @Post(':id/cancel')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RolesGuard, PermissionsGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.SUPERVISOR)
   @Permissions(Permission.MANAGE_USERS)
   @ApiOperation({ summary: 'Cancel a visiting vehicle record' })
   @ApiResponse({ status: 200, description: 'Vehicle cancelled successfully' })
@@ -141,7 +141,7 @@ export class VehiclesController {
 
   @Patch(':id')
   @UseGuards(RolesGuard, PermissionsGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.SUPERVISOR)
   @Permissions(Permission.MANAGE_USERS)
   @ApiOperation({ summary: 'Update a visiting vehicle record' })
   @ApiResponse({ status: 200, description: 'Vehicle updated successfully' })

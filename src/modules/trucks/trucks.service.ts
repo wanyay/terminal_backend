@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual, LessThanOrEqual, Between } from 'typeorm';
 import { ContainerTruck } from './entities/container-truck.entity';
@@ -13,12 +17,15 @@ import { PaginationQueryDto } from '@/shared/dto/pagination-query.dto';
 import { PaginatedResult } from '@/shared/interfaces/paginated-result.interface';
 import { paginate } from '@/shared/helpers/paginate';
 import { TruckStatus } from './enums/truck-status.enum';
+import { BlacklistService } from '@/modules/blacklist/blacklist.service';
+import { BlacklistType } from '@/modules/blacklist/enums/blacklist-type.enum';
 
 @Injectable()
 export class TrucksService {
   constructor(
     @InjectRepository(ContainerTruck)
     private readonly containerTruckRepository: Repository<ContainerTruck>,
+    private readonly blacklistService: BlacklistService,
   ) {}
 
   async findAll(
@@ -27,14 +34,15 @@ export class TrucksService {
     const where: any = {};
 
     if (query.startDate && query.endDate) {
-      where.createdAt = Between(
-        new Date(query.startDate),
-        new Date(query.endDate),
-      );
+      const endDate = new Date(query.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      where.createdAt = Between(new Date(query.startDate), endDate);
     } else if (query.startDate) {
       where.createdAt = MoreThanOrEqual(new Date(query.startDate));
     } else if (query.endDate) {
-      where.createdAt = LessThanOrEqual(new Date(query.endDate));
+      const endDate = new Date(query.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      where.createdAt = LessThanOrEqual(endDate);
     }
 
     if (query.entryGateId) {
@@ -84,6 +92,30 @@ export class TrucksService {
   }
 
   async registerEntry(dto: RegisterTruckEntryDto): Promise<ContainerTruck> {
+    // Check if license plate is blacklisted
+    const isPlateBlacklisted = await this.blacklistService.checkBlocked(
+      BlacklistType.LICENSE_PLATE,
+      dto.licensePlate,
+    );
+    if (isPlateBlacklisted) {
+      throw new BadRequestException(
+        `Vehicle with license plate ${dto.licensePlate} is blacklisted and cannot enter the port.`,
+      );
+    }
+
+    // Check if driver NRC is blacklisted
+    if (dto.driverNrc) {
+      const isNrcBlacklisted = await this.blacklistService.checkBlocked(
+        BlacklistType.NRC_PASSPORT,
+        dto.driverNrc,
+      );
+      if (isNrcBlacklisted) {
+        throw new BadRequestException(
+          `Driver with NRC ${dto.driverNrc} is blacklisted and cannot enter the port.`,
+        );
+      }
+    }
+
     const truck = this.containerTruckRepository.create({
       licensePlate: dto.licensePlate,
       containerNumber: dto.containerNumber,

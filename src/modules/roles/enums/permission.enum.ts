@@ -8,6 +8,9 @@ export enum Permission {
   // Gate Management
   MANAGE_GATES = 'MANAGE_GATES',
 
+  // Blacklist Management
+  MANAGE_BLACKLIST = 'MANAGE_BLACKLIST',
+
   // Entry / Exit Operations
   REGISTER_ENTRY = 'REGISTER_ENTRY',
   REGISTER_EXIT = 'REGISTER_EXIT',

@@ -32,9 +32,11 @@ export class AuditLogsController {
 
   @Get()
   @UseGuards(RolesGuard, PermissionsGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.SUPERVISOR)
   @Permissions(Permission.VIEW_AUDIT_LOGS)
-  @ApiOperation({ summary: 'Get all audit logs with pagination, search, and sorting' })
+  @ApiOperation({
+    summary: 'Get all audit logs with pagination, search, and sorting',
+  })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'perPage', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -47,7 +49,7 @@ export class AuditLogsController {
 
   @Get('user/:userId')
   @UseGuards(RolesGuard, PermissionsGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.SUPERVISOR)
   @Permissions(Permission.VIEW_AUDIT_LOGS)
   @ApiOperation({ summary: 'Get audit logs for a specific user' })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -55,7 +57,10 @@ export class AuditLogsController {
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'sortBy', required: false, type: String })
   @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
-  @ApiResponse({ status: 200, description: 'Return paginated audit logs for the user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return paginated audit logs for the user',
+  })
   findByUser(
     @Param('userId', ParseUUIDPipe) userId: string,
     @Query() paginationQuery: PaginationQueryDto,
@@ -65,7 +70,7 @@ export class AuditLogsController {
 
   @Get('module/:module')
   @UseGuards(RolesGuard, PermissionsGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.SUPERVISOR)
   @Permissions(Permission.VIEW_AUDIT_LOGS)
   @ApiOperation({ summary: 'Get audit logs for a specific module' })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -73,7 +78,10 @@ export class AuditLogsController {
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'sortBy', required: false, type: String })
   @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
-  @ApiResponse({ status: 200, description: 'Return paginated audit logs for the module' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return paginated audit logs for the module',
+  })
   findByModule(
     @Param('module') module: string,
     @Query() paginationQuery: PaginationQueryDto,
