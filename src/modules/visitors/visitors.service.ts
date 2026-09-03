@@ -19,6 +19,10 @@ import { paginate } from '@/shared/helpers/paginate';
 import { TruckStatus } from '@/modules/trucks/enums/truck-status.enum';
 import { BlacklistService } from '@/modules/blacklist/blacklist.service';
 import { BlacklistType } from '@/modules/blacklist/enums/blacklist-type.enum';
+import {
+  ExcelExportHelper,
+  ExcelColumn,
+} from '@/shared/helpers/excel-export.helper';
 
 @Injectable()
 export class VisitorsService {
@@ -177,5 +181,76 @@ export class VisitorsService {
       where: { status: TruckStatus.ENTERED },
       relations: ['entryGate', 'exitGate'],
     });
+  }
+
+  async exportToExcel(query: VisitorsQueryDto): Promise<Buffer> {
+    const where: any = {};
+
+    if (query.startDate && query.endDate) {
+      const endDate = new Date(query.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      where.createdAt = Between(new Date(query.startDate), endDate);
+    } else if (query.startDate) {
+      where.createdAt = MoreThanOrEqual(new Date(query.startDate));
+    } else if (query.endDate) {
+      const endDate = new Date(query.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      where.createdAt = LessThanOrEqual(endDate);
+    }
+
+    if (query.entryGateId) {
+      where.entryGateId = query.entryGateId;
+    }
+
+    if (query.exitGateId) {
+      where.exitGateId = query.exitGateId;
+    }
+
+    if (query.search) {
+      where.visitorName = query.search;
+    }
+
+    const visitors = await this.visitorRepository.find({
+      where,
+      relations: ['entryGate', 'exitGate'],
+      order: { createdAt: 'DESC' },
+    });
+
+    const workbook = await ExcelExportHelper.createWorkbook();
+    const worksheet = ExcelExportHelper.addWorksheet(workbook, 'Visitors');
+
+    const columns: ExcelColumn[] = [
+      { header: 'Visitor Name', key: 'visitorName', width: 20 },
+      { header: 'NRC/Passport', key: 'nrcOrPassport', width: 20 },
+      { header: 'Company Name', key: 'companyName', width: 20 },
+      { header: 'Host Employee', key: 'hostEmployee', width: 20 },
+      { header: 'Entry Gate', key: 'entryGate', width: 15 },
+      { header: 'Exit Gate', key: 'exitGate', width: 15 },
+      { header: 'Entry Time', key: 'entryTime', width: 20 },
+      { header: 'Exit Time', key: 'exitTime', width: 20 },
+      { header: 'Status', key: 'status', width: 15 },
+      { header: 'Remarks', key: 'remarks', width: 30 },
+    ];
+
+    ExcelExportHelper.setColumns(worksheet, columns);
+
+    const rows = visitors.map((visitor) => ({
+      visitorName: visitor.visitorName,
+      nrcOrPassport: visitor.nrcOrPassport || '',
+      companyName: visitor.companyName || '',
+      hostEmployee: visitor.hostEmployee || '',
+      entryGate: visitor.entryGate?.name || '',
+      exitGate: visitor.exitGate?.name || '',
+      entryTime: visitor.entryTime ? visitor.entryTime.toISOString() : '',
+      exitTime: visitor.exitTime ? visitor.exitTime.toISOString() : '',
+      status: visitor.status,
+      remarks: visitor.remarks || '',
+    }));
+
+    ExcelExportHelper.addRows(worksheet, rows);
+    ExcelExportHelper.styleHeaderRow(worksheet);
+    ExcelExportHelper.autoFitColumns(worksheet);
+
+    return ExcelExportHelper.generateBuffer(workbook);
   }
 }

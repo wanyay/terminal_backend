@@ -19,6 +19,10 @@ import { paginate } from '@/shared/helpers/paginate';
 import { TruckStatus } from '@/modules/trucks/enums/truck-status.enum';
 import { BlacklistService } from '@/modules/blacklist/blacklist.service';
 import { BlacklistType } from '@/modules/blacklist/enums/blacklist-type.enum';
+import {
+  ExcelExportHelper,
+  ExcelColumn,
+} from '@/shared/helpers/excel-export.helper';
 
 @Injectable()
 export class VehiclesService {
@@ -184,5 +188,85 @@ export class VehiclesService {
   async remove(id: string): Promise<void> {
     const vehicle = await this.findOne(id);
     await this.vehicleRepository.softRemove(vehicle);
+  }
+
+  async exportToExcel(query: VehiclesQueryDto): Promise<Buffer> {
+    const where: any = {};
+
+    if (query.startDate && query.endDate) {
+      const endDate = new Date(query.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      where.createdAt = Between(new Date(query.startDate), endDate);
+    } else if (query.startDate) {
+      where.createdAt = MoreThanOrEqual(new Date(query.startDate));
+    } else if (query.endDate) {
+      const endDate = new Date(query.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      where.createdAt = LessThanOrEqual(endDate);
+    }
+
+    if (query.entryGateId) {
+      where.entryGateId = query.entryGateId;
+    }
+
+    if (query.exitGateId) {
+      where.exitGateId = query.exitGateId;
+    }
+
+    if (query.search) {
+      where.plateNumber = query.search;
+    }
+
+    const vehicles = await this.vehicleRepository.find({
+      where,
+      relations: ['entryGate', 'exitGate'],
+      order: { createdAt: 'DESC' },
+    });
+
+    const workbook = await ExcelExportHelper.createWorkbook();
+    const worksheet = ExcelExportHelper.addWorksheet(
+      workbook,
+      'Visiting Vehicles',
+    );
+
+    const columns: ExcelColumn[] = [
+      { header: 'Plate Number', key: 'plateNumber', width: 20 },
+      { header: 'Vehicle Type', key: 'vehicleType', width: 15 },
+      { header: 'Vehicle Model', key: 'vehicleModel', width: 20 },
+      { header: 'Visitor Name', key: 'visitorName', width: 20 },
+      { header: 'NRC/License', key: 'nrcOrLicense', width: 20 },
+      { header: 'Company Name', key: 'companyName', width: 20 },
+      { header: 'Purpose of Visit', key: 'purposeOfVisit', width: 20 },
+      { header: 'Entry Gate', key: 'entryGate', width: 15 },
+      { header: 'Exit Gate', key: 'exitGate', width: 15 },
+      { header: 'Entry Time', key: 'entryTime', width: 20 },
+      { header: 'Exit Time', key: 'exitTime', width: 20 },
+      { header: 'Status', key: 'status', width: 15 },
+      { header: 'Remarks', key: 'remarks', width: 30 },
+    ];
+
+    ExcelExportHelper.setColumns(worksheet, columns);
+
+    const rows = vehicles.map((vehicle) => ({
+      plateNumber: vehicle.plateNumber,
+      vehicleType: vehicle.vehicleType,
+      vehicleModel: vehicle.vehicleModel,
+      visitorName: vehicle.visitorName,
+      nrcOrLicense: vehicle.nrcOrLicense || '',
+      companyName: vehicle.companyName || '',
+      purposeOfVisit: vehicle.purposeOfVisit || '',
+      entryGate: vehicle.entryGate?.name || '',
+      exitGate: vehicle.exitGate?.name || '',
+      entryTime: vehicle.entryTime ? vehicle.entryTime.toISOString() : '',
+      exitTime: vehicle.exitTime ? vehicle.exitTime.toISOString() : '',
+      status: vehicle.status,
+      remarks: vehicle.remarks || '',
+    }));
+
+    ExcelExportHelper.addRows(worksheet, rows);
+    ExcelExportHelper.styleHeaderRow(worksheet);
+    ExcelExportHelper.autoFitColumns(worksheet);
+
+    return ExcelExportHelper.generateBuffer(workbook);
   }
 }

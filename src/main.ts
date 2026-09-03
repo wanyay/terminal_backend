@@ -4,6 +4,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from '@/shared/filters/http-exception.filter';
 import { TransformInterceptor } from '@/shared/interceptors/transform.interceptor';
+import * as fs from 'fs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -58,6 +59,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
+  fs.writeFileSync('./swagger.json', JSON.stringify(document, null, 2));
   // Enable CORS
   app.enableCors();
 

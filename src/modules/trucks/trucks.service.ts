@@ -19,6 +19,10 @@ import { paginate } from '@/shared/helpers/paginate';
 import { TruckStatus } from './enums/truck-status.enum';
 import { BlacklistService } from '@/modules/blacklist/blacklist.service';
 import { BlacklistType } from '@/modules/blacklist/enums/blacklist-type.enum';
+import {
+  ExcelExportHelper,
+  ExcelColumn,
+} from '@/shared/helpers/excel-export.helper';
 
 @Injectable()
 export class TrucksService {
@@ -189,5 +193,79 @@ export class TrucksService {
       where,
       relations: ['entryGate', 'exitGate'],
     });
+  }
+
+  async exportToExcel(query: TrucksQueryDto): Promise<Buffer> {
+    const where: any = {};
+
+    if (query.startDate && query.endDate) {
+      const endDate = new Date(query.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      where.createdAt = Between(new Date(query.startDate), endDate);
+    } else if (query.startDate) {
+      where.createdAt = MoreThanOrEqual(new Date(query.startDate));
+    } else if (query.endDate) {
+      const endDate = new Date(query.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      where.createdAt = LessThanOrEqual(endDate);
+    }
+
+    if (query.entryGateId) {
+      where.entryGateId = query.entryGateId;
+    }
+
+    if (query.exitGateId) {
+      where.exitGateId = query.exitGateId;
+    }
+
+    if (query.search) {
+      where.licensePlate = query.search;
+    }
+
+    const trucks = await this.containerTruckRepository.find({
+      where,
+      relations: ['entryGate', 'exitGate'],
+      order: { createdAt: 'DESC' },
+    });
+
+    const workbook = await ExcelExportHelper.createWorkbook();
+    const worksheet = ExcelExportHelper.addWorksheet(
+      workbook,
+      'Container Trucks',
+    );
+
+    const columns: ExcelColumn[] = [
+      { header: 'License Plate', key: 'licensePlate', width: 20 },
+      { header: 'Container Number', key: 'containerNumber', width: 20 },
+      { header: 'Driver Name', key: 'driverName', width: 20 },
+      { header: 'Driver NRC', key: 'driverNrc', width: 20 },
+      { header: 'Entry Gate', key: 'entryGate', width: 15 },
+      { header: 'Exit Gate', key: 'exitGate', width: 15 },
+      { header: 'Entry Time', key: 'entryTime', width: 20 },
+      { header: 'Exit Time', key: 'exitTime', width: 20 },
+      { header: 'Status', key: 'status', width: 15 },
+      { header: 'Remarks', key: 'remarks', width: 30 },
+    ];
+
+    ExcelExportHelper.setColumns(worksheet, columns);
+
+    const rows = trucks.map((truck) => ({
+      licensePlate: truck.licensePlate,
+      containerNumber: truck.containerNumber,
+      driverName: truck.driverName,
+      driverNrc: truck.driverNrc,
+      entryGate: truck.entryGate?.name || '',
+      exitGate: truck.exitGate?.name || '',
+      entryTime: truck.entryTime ? truck.entryTime.toISOString() : '',
+      exitTime: truck.exitTime ? truck.exitTime.toISOString() : '',
+      status: truck.status,
+      remarks: truck.remarks || '',
+    }));
+
+    ExcelExportHelper.addRows(worksheet, rows);
+    ExcelExportHelper.styleHeaderRow(worksheet);
+    ExcelExportHelper.autoFitColumns(worksheet);
+
+    return ExcelExportHelper.generateBuffer(workbook);
   }
 }

@@ -35,7 +35,6 @@ import { Roles } from '@/shared/decorators/roles.decorator';
 import { Permissions } from '@/shared/decorators/permissions.decorator';
 import { Role } from '@/modules/roles/enums/role.enum';
 import { Permission } from '@/modules/roles/enums/permission.enum';
-import { PaginationQueryDto } from '@/shared/dto/pagination-query.dto';
 
 @ApiTags('Visiting Vehicles')
 @ApiBearerAuth('JWT-auth')

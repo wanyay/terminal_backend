@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Res,
   Body,
   Patch,
   Param,
@@ -28,6 +29,7 @@ import {
   ActiveTrucksQueryDto,
   TrucksQueryDto,
 } from './dto';
+import { Response } from 'express';
 import { JwtAuthGuard } from '@/shared/guards/jwt-auth.guard';
 import { RolesGuard } from '@/shared/guards/roles.guard';
 import { PermissionsGuard } from '@/shared/guards/permissions.guard';
@@ -35,7 +37,6 @@ import { Roles } from '@/shared/decorators/roles.decorator';
 import { Permissions } from '@/shared/decorators/permissions.decorator';
 import { Role } from '@/modules/roles/enums/role.enum';
 import { Permission } from '@/modules/roles/enums/permission.enum';
-import { PaginationQueryDto } from '@/shared/dto/pagination-query.dto';
 
 @ApiTags('Container Trucks')
 @ApiBearerAuth('JWT-auth')
@@ -77,6 +78,37 @@ export class TrucksController {
   })
   findAll(@Query() query: TrucksQueryDto) {
     return this.trucksService.findAll(query);
+  }
+
+  @Get('export')
+  @ApiOperation({
+    summary:
+      'Export container trucks to Excel with pagination, search, sorting, and filters',
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'perPage', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'sortBy', required: false, type: String })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
+  @ApiQuery({ name: 'entryGateId', required: false, type: String })
+  @ApiQuery({ name: 'exitGateId', required: false, type: String })
+  @ApiResponse({
+    status: 200,
+    description: 'Return paginated container trucks',
+  })
+  async exportToExcel(@Query() query: TrucksQueryDto, @Res() res: Response) {
+    const buffer = await this.trucksService.exportToExcel(query);
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=container-trucks.xlsx',
+    );
+    res.send(buffer);
   }
 
   @Get('active')

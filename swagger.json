@@ -1,0 +1,3538 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v1/users": {
+      "post": {
+        "operationId": "UsersController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully"
+          },
+          "409": {
+            "description": "Username already exists"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create a new user",
+        "tags": [
+          "Users"
+        ]
+      },
+      "get": {
+        "operationId": "UsersController_findAll_v1",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term across searchable fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return paginated users"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get all users with pagination, search, and sorting",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/users/{id}": {
+      "get": {
+        "operationId": "UsersController_findOne_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return user"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get user by ID",
+        "tags": [
+          "Users"
+        ]
+      },
+      "patch": {
+        "operationId": "UsersController_update_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update user",
+        "tags": [
+          "Users"
+        ]
+      },
+      "delete": {
+        "operationId": "UsersController_remove_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Delete user (Super Admin only)",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/users/{id}/activate": {
+      "post": {
+        "operationId": "UsersController_activate_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User activated successfully"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Activate user account",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/users/{id}/deactivate": {
+      "post": {
+        "operationId": "UsersController_deactivate_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deactivated successfully"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Deactivate user account",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/gates": {
+      "post": {
+        "operationId": "GatesController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Gate created successfully"
+          },
+          "409": {
+            "description": "Gate name already exists"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create a new gate",
+        "tags": [
+          "Gates"
+        ]
+      },
+      "get": {
+        "operationId": "GatesController_findAll_v1",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term across searchable fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return paginated gates"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get all gates with pagination, search, and sorting",
+        "tags": [
+          "Gates"
+        ]
+      }
+    },
+    "/api/v1/gates/{id}": {
+      "get": {
+        "operationId": "GatesController_findOne_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return gate"
+          },
+          "404": {
+            "description": "Gate not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get gate by ID",
+        "tags": [
+          "Gates"
+        ]
+      },
+      "patch": {
+        "operationId": "GatesController_update_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Gate updated successfully"
+          },
+          "404": {
+            "description": "Gate not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update gate",
+        "tags": [
+          "Gates"
+        ]
+      },
+      "delete": {
+        "operationId": "GatesController_remove_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Gate deleted successfully"
+          },
+          "404": {
+            "description": "Gate not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Delete gate (Super Admin only)",
+        "tags": [
+          "Gates"
+        ]
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "operationId": "AuthController_register_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokensDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Username already exists"
+          }
+        },
+        "summary": "Register a new user",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "AuthController_login_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokensDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        },
+        "summary": "Login with username and password",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Logout successful"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Logout user",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refreshTokens_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tokens refreshed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokensDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid refresh token"
+          }
+        },
+        "summary": "Refresh access token",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/change-password": {
+      "post": {
+        "description": "Self-serve: provide currentPassword + newPassword. Admin reset: provide targetUserId + newPassword (no currentPassword needed).",
+        "operationId": "AuthController_changePassword_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed successfully"
+          },
+          "400": {
+            "description": "Current password is incorrect or validation failed"
+          },
+          "403": {
+            "description": "Only admins can reset another user password"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Change password (self-serve or admin reset)",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/profile": {
+      "get": {
+        "operationId": "AuthController_getProfile_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return current user profile"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get current user profile",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/trucks": {
+      "post": {
+        "operationId": "TrucksController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTruckDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Truck created successfully"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create a new container truck record",
+        "tags": [
+          "Container Trucks"
+        ]
+      },
+      "get": {
+        "operationId": "TrucksController_findAll_v1",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term across searchable fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by creation start date (created_at >= startDate)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by creation end date (created_at <= endDate)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entryGateId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by entry gate ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "exitGateId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by exit gate ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return paginated container trucks"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get all container trucks with pagination, search, sorting, and filters",
+        "tags": [
+          "Container Trucks"
+        ]
+      }
+    },
+    "/api/v1/trucks/export": {
+      "get": {
+        "operationId": "TrucksController_exportToExcel_v1",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term across searchable fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by creation start date (created_at >= startDate)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by creation end date (created_at <= endDate)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entryGateId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by entry gate ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "exitGateId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by exit gate ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return paginated container trucks"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Export container trucks to Excel with pagination, search, sorting, and filters",
+        "tags": [
+          "Container Trucks"
+        ]
+      }
+    },
+    "/api/v1/trucks/active": {
+      "get": {
+        "operationId": "TrucksController_findAllActive_v1",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term across searchable fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "DESC",
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "gateId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by entry gate ID",
+            "schema": {
+              "example": "c7ce6251-4e95-48ea-b697-e1cacf5d2ad4",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return paginated active container trucks"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get all active (entered) container trucks with pagination",
+        "tags": [
+          "Container Trucks"
+        ]
+      }
+    },
+    "/api/v1/trucks/{id}": {
+      "get": {
+        "operationId": "TrucksController_findOne_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return container truck"
+          },
+          "404": {
+            "description": "Truck not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get a container truck by ID",
+        "tags": [
+          "Container Trucks"
+        ]
+      },
+      "patch": {
+        "operationId": "TrucksController_update_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTruckDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Truck updated successfully"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Truck not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update a container truck record",
+        "tags": [
+          "Container Trucks"
+        ]
+      },
+      "delete": {
+        "operationId": "TrucksController_remove_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Truck deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Truck not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Soft delete a container truck record",
+        "tags": [
+          "Container Trucks"
+        ]
+      }
+    },
+    "/api/v1/trucks/entry": {
+      "post": {
+        "operationId": "TrucksController_registerEntry_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterTruckEntryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Entry registered successfully"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Register a container truck entry",
+        "tags": [
+          "Container Trucks"
+        ]
+      }
+    },
+    "/api/v1/trucks/{id}/exit": {
+      "post": {
+        "operationId": "TrucksController_registerExit_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterTruckExitDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Exit registered successfully"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Truck not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Register a container truck exit",
+        "tags": [
+          "Container Trucks"
+        ]
+      }
+    },
+    "/api/v1/trucks/{id}/cancel": {
+      "post": {
+        "operationId": "TrucksController_cancel_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Truck cancelled successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Truck not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Cancel a container truck record",
+        "tags": [
+          "Container Trucks"
+        ]
+      }
+    },
+    "/api/v1/blacklist": {
+      "post": {
+        "operationId": "BlacklistController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBlacklistDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Blacklist entry created successfully"
+          },
+          "409": {
+            "description": "Entry already blocked"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Add entry to blacklist",
+        "tags": [
+          "Blacklist"
+        ]
+      },
+      "get": {
+        "operationId": "BlacklistController_findAll_v1",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term across searchable fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return paginated blacklist entries"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get all blacklist entries with pagination, search, and sorting",
+        "tags": [
+          "Blacklist"
+        ]
+      }
+    },
+    "/api/v1/blacklist/check": {
+      "get": {
+        "operationId": "BlacklistController_checkBlocked_v1",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "license_plate",
+                "nrc_passport"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "value",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return blocked status"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Check if a value is blocked",
+        "tags": [
+          "Blacklist"
+        ]
+      }
+    },
+    "/api/v1/blacklist/{id}": {
+      "get": {
+        "operationId": "BlacklistController_findOne_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return blacklist entry"
+          },
+          "404": {
+            "description": "Blacklist entry not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get blacklist entry by ID",
+        "tags": [
+          "Blacklist"
+        ]
+      },
+      "patch": {
+        "operationId": "BlacklistController_update_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBlacklistDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Blacklist entry updated successfully"
+          },
+          "404": {
+            "description": "Blacklist entry not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update blacklist entry",
+        "tags": [
+          "Blacklist"
+        ]
+      },
+      "delete": {
+        "operationId": "BlacklistController_remove_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blacklist entry deleted successfully"
+          },
+          "404": {
+            "description": "Blacklist entry not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Delete blacklist entry (Super Admin only)",
+        "tags": [
+          "Blacklist"
+        ]
+      }
+    },
+    "/api/v1/visitors": {
+      "post": {
+        "operationId": "VisitorsController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVisitorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Visitor created successfully"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create a new visitor",
+        "tags": [
+          "Visitors"
+        ]
+      },
+      "get": {
+        "operationId": "VisitorsController_findAll_v1",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term across searchable fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by creation start date (created_at >= startDate)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by creation end date (created_at <= endDate)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entryGateId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by entry gate ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "exitGateId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by exit gate ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return paginated visitors"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get all visitors with pagination, search, sorting, and filters",
+        "tags": [
+          "Visitors"
+        ]
+      }
+    },
+    "/api/v1/visitors/active": {
+      "get": {
+        "operationId": "VisitorsController_findAllActive_v1",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term across searchable fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return paginated active visitors"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get all active visitors inside the port",
+        "tags": [
+          "Visitors"
+        ]
+      }
+    },
+    "/api/v1/visitors/{id}": {
+      "get": {
+        "operationId": "VisitorsController_findOne_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return visitor"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Visitor not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get visitor by ID",
+        "tags": [
+          "Visitors"
+        ]
+      },
+      "patch": {
+        "operationId": "VisitorsController_update_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVisitorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Visitor updated successfully"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Visitor not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update visitor",
+        "tags": [
+          "Visitors"
+        ]
+      },
+      "delete": {
+        "operationId": "VisitorsController_remove_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Visitor deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Visitor not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Delete visitor (Super Admin only)",
+        "tags": [
+          "Visitors"
+        ]
+      }
+    },
+    "/api/v1/visitors/entry": {
+      "post": {
+        "operationId": "VisitorsController_registerEntry_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterVisitorEntryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Visitor entry registered successfully"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Register a visitor entry",
+        "tags": [
+          "Visitors"
+        ]
+      }
+    },
+    "/api/v1/visitors/{id}/exit": {
+      "post": {
+        "operationId": "VisitorsController_registerExit_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterVisitorExitDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Visitor exit registered successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Visitor not found or not currently entered"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Register a visitor exit",
+        "tags": [
+          "Visitors"
+        ]
+      }
+    },
+    "/api/v1/visitors/{id}/cancel": {
+      "post": {
+        "operationId": "VisitorsController_cancel_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Visitor cancelled successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Visitor not found or already exited"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Cancel a visitor record",
+        "tags": [
+          "Visitors"
+        ]
+      }
+    },
+    "/api/v1/vehicles": {
+      "post": {
+        "operationId": "VehiclesController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVehicleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Vehicle created successfully"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create a new visiting vehicle record",
+        "tags": [
+          "Visiting Vehicles"
+        ]
+      },
+      "get": {
+        "operationId": "VehiclesController_findAll_v1",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term across searchable fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by creation start date (created_at >= startDate)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by creation end date (created_at <= endDate)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entryGateId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by entry gate ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "exitGateId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by exit gate ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return paginated visiting vehicles"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get all visiting vehicles with pagination, search, sorting, and filters",
+        "tags": [
+          "Visiting Vehicles"
+        ]
+      }
+    },
+    "/api/v1/vehicles/active": {
+      "get": {
+        "operationId": "VehiclesController_findAllActive_v1",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term across searchable fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "DESC",
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "gateId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by entry gate ID",
+            "schema": {
+              "example": "c7ce6251-4e95-48ea-b697-e1cacf5d2ad4",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return paginated active visiting vehicles"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get all actively entered visiting vehicles with pagination",
+        "tags": [
+          "Visiting Vehicles"
+        ]
+      }
+    },
+    "/api/v1/vehicles/{id}": {
+      "get": {
+        "operationId": "VehiclesController_findOne_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return visiting vehicle"
+          },
+          "404": {
+            "description": "Vehicle not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get visiting vehicle by ID",
+        "tags": [
+          "Visiting Vehicles"
+        ]
+      },
+      "patch": {
+        "operationId": "VehiclesController_update_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVehicleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vehicle updated successfully"
+          },
+          "404": {
+            "description": "Vehicle not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update a visiting vehicle record",
+        "tags": [
+          "Visiting Vehicles"
+        ]
+      },
+      "delete": {
+        "operationId": "VehiclesController_remove_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vehicle deleted successfully"
+          },
+          "404": {
+            "description": "Vehicle not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Delete a visiting vehicle record",
+        "tags": [
+          "Visiting Vehicles"
+        ]
+      }
+    },
+    "/api/v1/vehicles/entry": {
+      "post": {
+        "operationId": "VehiclesController_registerEntry_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterVehicleEntryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Vehicle entry registered successfully"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Register a visiting vehicle entry",
+        "tags": [
+          "Visiting Vehicles"
+        ]
+      }
+    },
+    "/api/v1/vehicles/{id}/exit": {
+      "post": {
+        "operationId": "VehiclesController_registerExit_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterVehicleExitDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vehicle exit registered successfully"
+          },
+          "400": {
+            "description": "Vehicle is not in ENTERED status"
+          },
+          "404": {
+            "description": "Vehicle not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Register a visiting vehicle exit",
+        "tags": [
+          "Visiting Vehicles"
+        ]
+      }
+    },
+    "/api/v1/vehicles/{id}/cancel": {
+      "post": {
+        "operationId": "VehiclesController_cancel_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vehicle cancelled successfully"
+          },
+          "404": {
+            "description": "Vehicle not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Cancel a visiting vehicle record",
+        "tags": [
+          "Visiting Vehicles"
+        ]
+      }
+    },
+    "/api/v1/audit-logs": {
+      "get": {
+        "operationId": "AuditLogsController_findAll_v1",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term across searchable fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return paginated audit logs"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get all audit logs with pagination, search, and sorting",
+        "tags": [
+          "Audit Logs"
+        ]
+      }
+    },
+    "/api/v1/audit-logs/user/{userId}": {
+      "get": {
+        "operationId": "AuditLogsController_findByUser_v1",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term across searchable fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return paginated audit logs for the user"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get audit logs for a specific user",
+        "tags": [
+          "Audit Logs"
+        ]
+      }
+    },
+    "/api/v1/audit-logs/module/{module}": {
+      "get": {
+        "operationId": "AuditLogsController_findByModule_v1",
+        "parameters": [
+          {
+            "name": "module",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term across searchable fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return paginated audit logs for the module"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get audit logs for a specific module",
+        "tags": [
+          "Audit Logs"
+        ]
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "operationId": "HealthController_check_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Health check passed\n\nThe Health Check is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {},
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Health check failed\n\nThe Health Check is not successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        },
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Health check endpoint",
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/api/v1/dashboard": {
+      "get": {
+        "operationId": "DashboardController_getDashboard_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return dashboard statistics"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get dashboard data",
+        "tags": [
+          "Dashboard"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Terminal Port Management System (TPMS) API",
+    "description": "API for managing and monitoring vehicles and visitors entering/exiting a terminal port, with JWT authentication and RBAC",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "JWT-auth": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "name": "JWT",
+        "description": "Enter JWT token",
+        "in": "header"
+      }
+    },
+    "schemas": {
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "john_doe"
+          },
+          "email": {
+            "type": "string",
+            "example": "john@example.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "password123",
+            "minLength": 6
+          },
+          "fullName": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "roles": {
+            "example": [
+              "USER"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assignedGateId": {
+            "type": "string",
+            "example": "gate-id-1"
+          },
+          "manageableGateIds": {
+            "example": [
+              "gate-id-1",
+              "gate-id-2"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "username",
+          "password",
+          "fullName"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "john_doe"
+          },
+          "email": {
+            "type": "string",
+            "example": "john@example.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "password123",
+            "minLength": 6
+          },
+          "fullName": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "roles": {
+            "example": [
+              "USER"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assignedGateId": {
+            "type": "string",
+            "example": "gate-id-1"
+          },
+          "manageableGateIds": {
+            "example": [
+              "gate-id-1",
+              "gate-id-2"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateGateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Entry Gate 1"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ENTRY",
+              "EXIT"
+            ],
+            "example": "ENTRY"
+          },
+          "description": {
+            "type": "string",
+            "example": "Main entrance for container trucks"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ]
+      },
+      "UpdateGateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Entry Gate 1"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ENTRY",
+              "EXIT"
+            ],
+            "example": "ENTRY"
+          },
+          "description": {
+            "type": "string",
+            "example": "Main entrance for container trucks"
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "john_doe"
+          },
+          "password": {
+            "type": "string",
+            "example": "password123",
+            "minLength": 6
+          },
+          "fullName": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "email": {
+            "type": "string",
+            "example": "john@example.com"
+          }
+        },
+        "required": [
+          "username",
+          "password",
+          "fullName"
+        ]
+      },
+      "TokensDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "accessToken",
+          "refreshToken"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "john_doe"
+          },
+          "password": {
+            "type": "string",
+            "example": "password123"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "ChangePasswordDto": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "example": "oldPassword123"
+          },
+          "newPassword": {
+            "type": "string",
+            "example": "newPassword456",
+            "minLength": 6
+          },
+          "targetUserId": {
+            "type": "string",
+            "description": "ID of the target user. Required when an admin resets another user password. Omit when changing own password.",
+            "example": "uuid-of-target-user"
+          },
+          "mustChangePassword": {
+            "type": "boolean",
+            "description": "Whether the target user must change password on next login. Defaults to false.",
+            "example": false
+          }
+        },
+        "required": [
+          "newPassword"
+        ]
+      },
+      "CreateTruckDto": {
+        "type": "object",
+        "properties": {
+          "licensePlate": {
+            "type": "string",
+            "example": "YGN-1234"
+          },
+          "containerNumber": {
+            "type": "string",
+            "example": "CONT-5678"
+          },
+          "driverName": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "driverNrc": {
+            "type": "string",
+            "example": "12/ABC(N)123456"
+          },
+          "entryGateId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "remarks": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "licensePlate"
+        ]
+      },
+      "RegisterTruckEntryDto": {
+        "type": "object",
+        "properties": {
+          "licensePlate": {
+            "type": "string",
+            "example": "YGN-1234"
+          },
+          "containerNumber": {
+            "type": "string",
+            "example": "CONT-5678"
+          },
+          "driverName": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "driverNrc": {
+            "type": "string",
+            "example": "12/ABC(N)123456"
+          },
+          "entryGateId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "remarks": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "licensePlate",
+          "entryGateId"
+        ]
+      },
+      "RegisterTruckExitDto": {
+        "type": "object",
+        "properties": {
+          "exitGateId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "remarks": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "exitGateId"
+        ]
+      },
+      "UpdateTruckDto": {
+        "type": "object",
+        "properties": {
+          "licensePlate": {
+            "type": "string",
+            "example": "YGN-1234"
+          },
+          "containerNumber": {
+            "type": "string",
+            "example": "CONT-5678"
+          },
+          "driverName": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "driverNrc": {
+            "type": "string",
+            "example": "12/ABC(N)123456"
+          },
+          "entryGateId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "remarks": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ENTERED",
+              "EXITED",
+              "CANCELLED"
+            ]
+          },
+          "exitGateId": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateBlacklistDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "license_plate",
+              "nrc_passport"
+            ],
+            "example": "license_plate"
+          },
+          "value": {
+            "type": "string",
+            "example": "YGN-1234"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Unauthorized vehicle"
+          },
+          "blockedBy": {
+            "type": "string",
+            "example": "uuid-of-blocking-user"
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      },
+      "UpdateBlacklistDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "license_plate",
+              "nrc_passport"
+            ],
+            "example": "license_plate"
+          },
+          "value": {
+            "type": "string",
+            "example": "YGN-1234"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Unauthorized vehicle"
+          },
+          "blockedBy": {
+            "type": "string",
+            "example": "uuid-of-blocking-user"
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateVisitorDto": {
+        "type": "object",
+        "properties": {
+          "visitorName": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "nrcOrPassport": {
+            "type": "string",
+            "example": "12/ABC(N)123456"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "example": "+959123456789"
+          },
+          "companyName": {
+            "type": "string",
+            "example": "ABC Company"
+          },
+          "purposeOfVisit": {
+            "type": "string",
+            "example": "Meeting"
+          },
+          "hostEmployee": {
+            "type": "string",
+            "example": "Mr. Manager"
+          },
+          "entryGateId": {
+            "type": "string"
+          },
+          "remarks": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "visitorName"
+        ]
+      },
+      "RegisterVisitorEntryDto": {
+        "type": "object",
+        "properties": {
+          "visitorName": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "nrcOrPassport": {
+            "type": "string",
+            "example": "12/ABC(N)123456"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "example": "+959123456789"
+          },
+          "companyName": {
+            "type": "string",
+            "example": "ABC Company"
+          },
+          "purposeOfVisit": {
+            "type": "string",
+            "example": "Meeting"
+          },
+          "hostEmployee": {
+            "type": "string",
+            "example": "Mr. Manager"
+          },
+          "entryGateId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "remarks": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "visitorName",
+          "entryGateId"
+        ]
+      },
+      "RegisterVisitorExitDto": {
+        "type": "object",
+        "properties": {
+          "exitGateId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "remarks": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "exitGateId"
+        ]
+      },
+      "UpdateVisitorDto": {
+        "type": "object",
+        "properties": {
+          "visitorName": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "nrcOrPassport": {
+            "type": "string",
+            "example": "12/ABC(N)123456"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "example": "+959123456789"
+          },
+          "companyName": {
+            "type": "string",
+            "example": "ABC Company"
+          },
+          "purposeOfVisit": {
+            "type": "string",
+            "example": "Meeting"
+          },
+          "hostEmployee": {
+            "type": "string",
+            "example": "Mr. Manager"
+          },
+          "entryGateId": {
+            "type": "string"
+          },
+          "remarks": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ENTERED",
+              "EXITED",
+              "CANCELLED"
+            ]
+          },
+          "exitGateId": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateVehicleDto": {
+        "type": "object",
+        "properties": {
+          "plateNumber": {
+            "type": "string",
+            "example": "YGN-5678"
+          },
+          "vehicleType": {
+            "type": "string",
+            "example": "Sedan"
+          },
+          "vehicleModel": {
+            "type": "string",
+            "example": "Toyota Corolla"
+          },
+          "visitorName": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "nrcOrLicense": {
+            "type": "string",
+            "example": "12/ABC(N)123456"
+          },
+          "companyName": {
+            "type": "string",
+            "example": "ABC Company"
+          },
+          "purposeOfVisit": {
+            "type": "string",
+            "example": "Delivery"
+          },
+          "entryGateId": {
+            "type": "string"
+          },
+          "remarks": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "plateNumber",
+          "visitorName"
+        ]
+      },
+      "RegisterVehicleEntryDto": {
+        "type": "object",
+        "properties": {
+          "plateNumber": {
+            "type": "string",
+            "example": "YGN-5678"
+          },
+          "vehicleType": {
+            "type": "string",
+            "example": "Sedan"
+          },
+          "vehicleModel": {
+            "type": "string",
+            "example": "Toyota Corolla"
+          },
+          "visitorName": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "nrcOrLicense": {
+            "type": "string",
+            "example": "12/ABC(N)123456"
+          },
+          "companyName": {
+            "type": "string",
+            "example": "ABC Company"
+          },
+          "purposeOfVisit": {
+            "type": "string",
+            "example": "Delivery"
+          },
+          "entryGateId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "remarks": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "plateNumber",
+          "visitorName",
+          "entryGateId"
+        ]
+      },
+      "RegisterVehicleExitDto": {
+        "type": "object",
+        "properties": {
+          "exitGateId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "remarks": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "exitGateId"
+        ]
+      },
+      "UpdateVehicleDto": {
+        "type": "object",
+        "properties": {
+          "plateNumber": {
+            "type": "string",
+            "example": "YGN-5678"
+          },
+          "vehicleType": {
+            "type": "string",
+            "example": "Sedan"
+          },
+          "vehicleModel": {
+            "type": "string",
+            "example": "Toyota Corolla"
+          },
+          "visitorName": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "nrcOrLicense": {
+            "type": "string",
+            "example": "12/ABC(N)123456"
+          },
+          "companyName": {
+            "type": "string",
+            "example": "ABC Company"
+          },
+          "purposeOfVisit": {
+            "type": "string",
+            "example": "Delivery"
+          },
+          "entryGateId": {
+            "type": "string"
+          },
+          "remarks": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ENTERED",
+              "EXITED",
+              "CANCELLED"
+            ]
+          },
+          "exitGateId": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
