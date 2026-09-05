@@ -23,6 +23,8 @@ import {
   ExcelExportHelper,
   ExcelColumn,
 } from '@/shared/helpers/excel-export.helper';
+import { AuditLogsService } from '@/modules/audit-logs/audit-logs.service';
+import { AuditAction, AuditModule } from '@/modules/audit-logs/enums/audit.enum';
 
 @Injectable()
 export class VehiclesService {
@@ -30,11 +32,20 @@ export class VehiclesService {
     @InjectRepository(VisitingVehicle)
     private readonly vehicleRepository: Repository<VisitingVehicle>,
     private readonly blacklistService: BlacklistService,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
 
   async create(createVehicleDto: CreateVehicleDto): Promise<VisitingVehicle> {
     const vehicle = this.vehicleRepository.create(createVehicleDto);
-    return this.vehicleRepository.save(vehicle);
+    const saved = await this.vehicleRepository.save(vehicle);
+
+    await this.auditLogsService.log({
+      action: AuditAction.CREATE,
+      module: AuditModule.VEHICLES,
+      newValues: { id: saved.id, plateNumber: saved.plateNumber },
+    });
+
+    return saved;
   }
 
   async findAll(
@@ -145,7 +156,15 @@ export class VehiclesService {
       entryTime: new Date(),
       status: TruckStatus.ENTERED,
     });
-    return this.vehicleRepository.save(vehicle);
+    const saved = await this.vehicleRepository.save(vehicle);
+
+    await this.auditLogsService.log({
+      action: AuditAction.ENTRY,
+      module: AuditModule.VEHICLES,
+      newValues: { id: saved.id, plateNumber: saved.plateNumber },
+    });
+
+    return saved;
   }
 
   async registerExit(
@@ -167,13 +186,29 @@ export class VehiclesService {
       remarks: dto.remarks ?? vehicle.remarks,
     });
 
-    return this.vehicleRepository.save(vehicle);
+    const saved = await this.vehicleRepository.save(vehicle);
+
+    await this.auditLogsService.log({
+      action: AuditAction.EXIT,
+      module: AuditModule.VEHICLES,
+      newValues: { id: saved.id, status: saved.status },
+    });
+
+    return saved;
   }
 
   async cancel(id: string): Promise<VisitingVehicle> {
     const vehicle = await this.findOne(id);
     vehicle.status = TruckStatus.CANCELLED;
-    return this.vehicleRepository.save(vehicle);
+    const saved = await this.vehicleRepository.save(vehicle);
+
+    await this.auditLogsService.log({
+      action: AuditAction.CANCEL,
+      module: AuditModule.VEHICLES,
+      newValues: { id: saved.id, status: saved.status },
+    });
+
+    return saved;
   }
 
   async update(
@@ -181,13 +216,29 @@ export class VehiclesService {
     updateVehicleDto: UpdateVehicleDto,
   ): Promise<VisitingVehicle> {
     const vehicle = await this.findOne(id);
+    const oldValues = { ...vehicle };
     Object.assign(vehicle, updateVehicleDto);
-    return this.vehicleRepository.save(vehicle);
+    const saved = await this.vehicleRepository.save(vehicle);
+
+    await this.auditLogsService.log({
+      action: AuditAction.UPDATE,
+      module: AuditModule.VEHICLES,
+      oldValues: { ...oldValues },
+      newValues: { id: saved.id, ...updateVehicleDto },
+    });
+
+    return saved;
   }
 
   async remove(id: string): Promise<void> {
     const vehicle = await this.findOne(id);
     await this.vehicleRepository.softRemove(vehicle);
+
+    await this.auditLogsService.log({
+      action: AuditAction.DELETE,
+      module: AuditModule.VEHICLES,
+      newValues: { id, plateNumber: vehicle.plateNumber },
+    });
   }
 
   async exportToExcel(query: VehiclesQueryDto): Promise<Buffer> {
@@ -266,6 +317,12 @@ export class VehiclesService {
     ExcelExportHelper.addRows(worksheet, rows);
     ExcelExportHelper.styleHeaderRow(worksheet);
     ExcelExportHelper.autoFitColumns(worksheet);
+
+    await this.auditLogsService.log({
+      action: AuditAction.EXPORT,
+      module: AuditModule.VEHICLES,
+      newValues: { count: vehicles.length, search: query.search || null },
+    });
 
     return ExcelExportHelper.generateBuffer(workbook);
   }

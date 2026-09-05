@@ -22,6 +22,7 @@ import { Permissions } from '@/shared/decorators/permissions.decorator';
 import { Role } from '@/modules/roles/enums/role.enum';
 import { Permission } from '@/modules/roles/enums/permission.enum';
 import { PaginationQueryDto } from '@/shared/dto/pagination-query.dto';
+import { AuditLogsQueryDto } from './dto/audit-logs-query.dto';
 
 @ApiTags('Audit Logs')
 @ApiBearerAuth('JWT-auth')
@@ -35,15 +36,21 @@ export class AuditLogsController {
   @Roles(Role.SUPER_ADMIN, Role.SUPERVISOR)
   @Permissions(Permission.VIEW_AUDIT_LOGS)
   @ApiOperation({
-    summary: 'Get all audit logs with pagination, search, and sorting',
+    summary: 'Get all audit logs with pagination, search, sorting, and filters',
   })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'perPage', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'sortBy', required: false, type: String })
   @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
+  @ApiQuery({ name: 'from', required: false, type: String })
+  @ApiQuery({ name: 'to', required: false, type: String })
+  @ApiQuery({ name: 'action', required: false, type: String })
+  @ApiQuery({ name: 'module', required: false, type: String })
+  @ApiQuery({ name: 'userId', required: false, type: String })
+  @ApiQuery({ name: 'username', required: false, type: String })
   @ApiResponse({ status: 200, description: 'Return paginated audit logs' })
-  findAll(@Query() paginationQuery: PaginationQueryDto) {
+  findAll(@Query() paginationQuery: AuditLogsQueryDto) {
     return this.auditLogsService.findAll(paginationQuery);
   }
 

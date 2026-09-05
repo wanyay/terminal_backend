@@ -14,6 +14,8 @@ import { Role } from '@/modules/roles/enums/role.enum';
 import { PaginationQueryDto } from '@/shared/dto/pagination-query.dto';
 import { PaginatedResult } from '@/shared/interfaces/paginated-result.interface';
 import { paginate } from '@/shared/helpers/paginate';
+import { AuditLogsService } from '@/modules/audit-logs/audit-logs.service';
+import { AuditAction, AuditModule } from '@/modules/audit-logs/enums/audit.enum';
 
 @Injectable()
 export class UsersService {
@@ -22,6 +24,7 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
     private readonly rolesService: RolesService,
     private readonly gatesService: GatesService,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -72,7 +75,22 @@ export class UsersService {
       user.manageableGates = [];
     }
 
-    return this.userRepository.save(user);
+    const saved = await this.userRepository.save(user);
+
+    await this.auditLogsService.log({
+      userId: saved.id,
+      username: saved.username,
+      action: AuditAction.CREATE,
+      module: AuditModule.USERS,
+      newValues: {
+        id: saved.id,
+        username: saved.username,
+        email: saved.email,
+        roles: saved.roles?.map((r) => r.name),
+      },
+    });
+
+    return saved;
   }
 
   async findAll(
@@ -166,12 +184,31 @@ export class UsersService {
       ...dataToUpdate
     } = updateUserDto;
     Object.assign(user, dataToUpdate);
-    return this.userRepository.save(user);
+    const saved = await this.userRepository.save(user);
+
+    await this.auditLogsService.log({
+      userId: saved.id,
+      username: saved.username,
+      action: AuditAction.UPDATE,
+      module: AuditModule.USERS,
+      oldValues: { id: saved.id, username: saved.username },
+      newValues: { id: saved.id, ...dataToUpdate },
+    });
+
+    return saved;
   }
 
   async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
     await this.userRepository.softRemove(user);
+
+    await this.auditLogsService.log({
+      userId: user.id,
+      username: user.username,
+      action: AuditAction.DELETE,
+      module: AuditModule.USERS,
+      newValues: { id: user.id, username: user.username },
+    });
   }
 
   async updateRefreshToken(
@@ -188,13 +225,33 @@ export class UsersService {
   async activate(id: string): Promise<User> {
     const user = await this.findOne(id);
     user.isActive = true;
-    return this.userRepository.save(user);
+    const saved = await this.userRepository.save(user);
+
+    await this.auditLogsService.log({
+      userId: saved.id,
+      username: saved.username,
+      action: AuditAction.ACTIVATE,
+      module: AuditModule.USERS,
+      newValues: { id: saved.id, isActive: true },
+    });
+
+    return saved;
   }
 
   async deactivate(id: string): Promise<User> {
     const user = await this.findOne(id);
     user.isActive = false;
     user.refreshToken = null;
-    return this.userRepository.save(user);
+    const saved = await this.userRepository.save(user);
+
+    await this.auditLogsService.log({
+      userId: saved.id,
+      username: saved.username,
+      action: AuditAction.DEACTIVATE,
+      module: AuditModule.USERS,
+      newValues: { id: saved.id, isActive: false },
+    });
+
+    return saved;
   }
 }

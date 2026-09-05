@@ -10,26 +10,42 @@ import { CreateGateDto, UpdateGateDto } from './dto';
 import { PaginationQueryDto } from '@/shared/dto/pagination-query.dto';
 import { PaginatedResult } from '@/shared/interfaces/paginated-result.interface';
 import { paginate } from '@/shared/helpers/paginate';
+import { AuditLogsService } from '@/modules/audit-logs/audit-logs.service';
+import { AuditAction, AuditModule } from '@/modules/audit-logs/enums/audit.enum';
 
 @Injectable()
 export class GatesService {
   constructor(
     @InjectRepository(Gate)
     private readonly gateRepository: Repository<Gate>,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
 
   async create(createGateDto: CreateGateDto): Promise<Gate> {
     const existingGate = await this.gateRepository.findOne({
-      where: { name: createGateDto.name },
+      where: { code: createGateDto.code },
     });
     if (existingGate) {
       throw new ConflictException(
-        `Gate with name "${createGateDto.name}" already exists`,
+        `Gate with code "${createGateDto.code}" already exists`,
       );
     }
 
     const gate = this.gateRepository.create(createGateDto);
-    return this.gateRepository.save(gate);
+    const saved = await this.gateRepository.save(gate);
+
+    await this.auditLogsService.log({
+      action: AuditAction.CREATE,
+      module: AuditModule.GATES,
+      newValues: {
+        id: saved.id,
+        code: saved.code,
+        name: saved.name,
+        type: saved.type,
+      },
+    });
+
+    return saved;
   }
 
   async findAll(
@@ -55,8 +71,21 @@ export class GatesService {
     return this.gateRepository.findOne({ where: { name } });
   }
 
+  async findByCode(code: string): Promise<Gate | null> {
+    return this.gateRepository.findOne({ where: { code } });
+  }
+
   async update(id: string, updateGateDto: UpdateGateDto): Promise<Gate> {
     const gate = await this.findOne(id);
+
+    if (updateGateDto.code && updateGateDto.code !== gate.code) {
+      const existingGate = await this.findByCode(updateGateDto.code);
+      if (existingGate) {
+        throw new ConflictException(
+          `Gate with code "${updateGateDto.code}" already exists`,
+        );
+      }
+    }
 
     if (updateGateDto.name && updateGateDto.name !== gate.name) {
       const existingGate = await this.findByName(updateGateDto.name);
@@ -68,11 +97,26 @@ export class GatesService {
     }
 
     Object.assign(gate, updateGateDto);
-    return this.gateRepository.save(gate);
+    const saved = await this.gateRepository.save(gate);
+
+    await this.auditLogsService.log({
+      action: AuditAction.UPDATE,
+      module: AuditModule.GATES,
+      oldValues: { id: saved.id, code: saved.code, name: saved.name },
+      newValues: { id: saved.id, ...updateGateDto },
+    });
+
+    return saved;
   }
 
   async remove(id: string): Promise<void> {
     const gate = await this.findOne(id);
     await this.gateRepository.softRemove(gate);
+
+    await this.auditLogsService.log({
+      action: AuditAction.DELETE,
+      module: AuditModule.GATES,
+      newValues: { id, code: gate.code, name: gate.name },
+    });
   }
 }

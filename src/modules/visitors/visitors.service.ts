@@ -23,6 +23,8 @@ import {
   ExcelExportHelper,
   ExcelColumn,
 } from '@/shared/helpers/excel-export.helper';
+import { AuditLogsService } from '@/modules/audit-logs/audit-logs.service';
+import { AuditAction, AuditModule } from '@/modules/audit-logs/enums/audit.enum';
 
 @Injectable()
 export class VisitorsService {
@@ -30,11 +32,20 @@ export class VisitorsService {
     @InjectRepository(Visitor)
     private readonly visitorRepository: Repository<Visitor>,
     private readonly blacklistService: BlacklistService,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
 
   async create(createVisitorDto: CreateVisitorDto): Promise<Visitor> {
     const visitor = this.visitorRepository.create(createVisitorDto);
-    return this.visitorRepository.save(visitor);
+    const saved = await this.visitorRepository.save(visitor);
+
+    await this.auditLogsService.log({
+      action: AuditAction.CREATE,
+      module: AuditModule.VISITORS,
+      newValues: { id: saved.id, visitorName: saved.visitorName },
+    });
+
+    return saved;
   }
 
   async findAll(query: VisitorsQueryDto): Promise<PaginatedResult<Visitor>> {
@@ -110,7 +121,15 @@ export class VisitorsService {
       entryTime: new Date(),
     });
 
-    return this.visitorRepository.save(visitor);
+    const saved = await this.visitorRepository.save(visitor);
+
+    await this.auditLogsService.log({
+      action: AuditAction.ENTRY,
+      module: AuditModule.VISITORS,
+      newValues: { id: saved.id, visitorName: saved.visitorName },
+    });
+
+    return saved;
   }
 
   async registerExit(
@@ -135,7 +154,15 @@ export class VisitorsService {
         : registerVisitorExitDto.remarks;
     }
 
-    return this.visitorRepository.save(visitor);
+    const saved = await this.visitorRepository.save(visitor);
+
+    await this.auditLogsService.log({
+      action: AuditAction.EXIT,
+      module: AuditModule.VISITORS,
+      newValues: { id: saved.id, status: saved.status },
+    });
+
+    return saved;
   }
 
   async update(
@@ -143,8 +170,18 @@ export class VisitorsService {
     updateVisitorDto: UpdateVisitorDto,
   ): Promise<Visitor> {
     const visitor = await this.findOne(id);
+    const oldValues = { ...visitor };
     Object.assign(visitor, updateVisitorDto);
-    return this.visitorRepository.save(visitor);
+    const saved = await this.visitorRepository.save(visitor);
+
+    await this.auditLogsService.log({
+      action: AuditAction.UPDATE,
+      module: AuditModule.VISITORS,
+      oldValues: { ...oldValues },
+      newValues: { id: saved.id, ...updateVisitorDto },
+    });
+
+    return saved;
   }
 
   async cancel(id: string): Promise<Visitor> {
@@ -157,12 +194,26 @@ export class VisitorsService {
     }
 
     visitor.status = TruckStatus.CANCELLED;
-    return this.visitorRepository.save(visitor);
+    const saved = await this.visitorRepository.save(visitor);
+
+    await this.auditLogsService.log({
+      action: AuditAction.CANCEL,
+      module: AuditModule.VISITORS,
+      newValues: { id: saved.id, status: saved.status },
+    });
+
+    return saved;
   }
 
   async remove(id: string): Promise<void> {
     const visitor = await this.findOne(id);
     await this.visitorRepository.softRemove(visitor);
+
+    await this.auditLogsService.log({
+      action: AuditAction.DELETE,
+      module: AuditModule.VISITORS,
+      newValues: { id, visitorName: visitor.visitorName },
+    });
   }
 
   async findAllActive(
@@ -250,6 +301,12 @@ export class VisitorsService {
     ExcelExportHelper.addRows(worksheet, rows);
     ExcelExportHelper.styleHeaderRow(worksheet);
     ExcelExportHelper.autoFitColumns(worksheet);
+
+    await this.auditLogsService.log({
+      action: AuditAction.EXPORT,
+      module: AuditModule.VISITORS,
+      newValues: { count: visitors.length, search: query.search || null },
+    });
 
     return ExcelExportHelper.generateBuffer(workbook);
   }

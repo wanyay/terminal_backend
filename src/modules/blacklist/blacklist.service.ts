@@ -10,12 +10,15 @@ import { CreateBlacklistDto, UpdateBlacklistDto } from './dto';
 import { PaginationQueryDto } from '@/shared/dto/pagination-query.dto';
 import { PaginatedResult } from '@/shared/interfaces/paginated-result.interface';
 import { paginate } from '@/shared/helpers/paginate';
+import { AuditLogsService } from '@/modules/audit-logs/audit-logs.service';
+import { AuditAction, AuditModule } from '@/modules/audit-logs/enums/audit.enum';
 
 @Injectable()
 export class BlacklistService {
   constructor(
     @InjectRepository(Blacklist)
     private readonly blacklistRepository: Repository<Blacklist>,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
 
   async create(createBlacklistDto: CreateBlacklistDto): Promise<Blacklist> {
@@ -37,7 +40,20 @@ export class BlacklistService {
       ...createBlacklistDto,
       blockedAt: new Date(),
     });
-    return this.blacklistRepository.save(blacklist);
+    const saved = await this.blacklistRepository.save(blacklist);
+
+    await this.auditLogsService.log({
+      action: AuditAction.CREATE,
+      module: AuditModule.BLACKLIST,
+      newValues: {
+        id: saved.id,
+        type: saved.type,
+        value: saved.value,
+        reason: saved.reason,
+      },
+    });
+
+    return saved;
   }
 
   async findAll(
@@ -91,12 +107,27 @@ export class BlacklistService {
     }
 
     Object.assign(blacklist, updateBlacklistDto);
-    return this.blacklistRepository.save(blacklist);
+    const saved = await this.blacklistRepository.save(blacklist);
+
+    await this.auditLogsService.log({
+      action: AuditAction.UPDATE,
+      module: AuditModule.BLACKLIST,
+      oldValues: { id: saved.id, type: saved.type, value: saved.value },
+      newValues: { id: saved.id, ...updateBlacklistDto },
+    });
+
+    return saved;
   }
 
   async remove(id: string): Promise<void> {
     const blacklist = await this.findOne(id);
     await this.blacklistRepository.softRemove(blacklist);
+
+    await this.auditLogsService.log({
+      action: AuditAction.DELETE,
+      module: AuditModule.BLACKLIST,
+      newValues: { id, type: blacklist.type, value: blacklist.value },
+    });
   }
 
   async checkBlocked(type: string, value: string): Promise<boolean> {

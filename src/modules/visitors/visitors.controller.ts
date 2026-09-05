@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Res,
   Body,
   Patch,
   Param,
@@ -27,6 +28,7 @@ import {
   RegisterVisitorExitDto,
   VisitorsQueryDto,
 } from './dto';
+import { Response } from 'express';
 import { JwtAuthGuard } from '@/shared/guards/jwt-auth.guard';
 import { RolesGuard } from '@/shared/guards/roles.guard';
 import { PermissionsGuard } from '@/shared/guards/permissions.guard';
@@ -73,6 +75,37 @@ export class VisitorsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   findAll(@Query() query: VisitorsQueryDto) {
     return this.visitorsService.findAll(query);
+  }
+
+  @Get('export')
+  @ApiOperation({
+    summary:
+      'Export visitors to Excel with pagination, search, sorting, and filters',
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'perPage', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'sortBy', required: false, type: String })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
+  @ApiQuery({ name: 'entryGateId', required: false, type: String })
+  @ApiQuery({ name: 'exitGateId', required: false, type: String })
+  @ApiResponse({
+    status: 200,
+    description: 'Return exported visitors as Excel',
+  })
+  async exportToExcel(@Query() query: VisitorsQueryDto, @Res() res: Response) {
+    const buffer = await this.visitorsService.exportToExcel(query);
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=visitors.xlsx',
+    );
+    res.send(buffer);
   }
 
   @Get('active')

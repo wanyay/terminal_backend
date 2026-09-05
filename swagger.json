@@ -1632,6 +1632,114 @@
         ]
       }
     },
+    "/api/v1/visitors/export": {
+      "get": {
+        "operationId": "VisitorsController_exportToExcel_v1",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term across searchable fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by creation start date (created_at >= startDate)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by creation end date (created_at <= endDate)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entryGateId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by entry gate ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "exitGateId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by exit gate ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return exported visitors as Excel"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Export visitors to Excel with pagination, search, sorting, and filters",
+        "tags": [
+          "Visitors"
+        ]
+      }
+    },
     "/api/v1/visitors/active": {
       "get": {
         "operationId": "VisitorsController_findAllActive_v1",
@@ -2088,6 +2196,114 @@
         ]
       }
     },
+    "/api/v1/vehicles/export": {
+      "get": {
+        "operationId": "VehiclesController_exportToExcel_v1",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term across searchable fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by creation start date (created_at >= startDate)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by creation end date (created_at <= endDate)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entryGateId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by entry gate ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "exitGateId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by exit gate ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return exported visiting vehicles as Excel"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Export visiting vehicles to Excel with pagination, search, sorting, and filters",
+        "tags": [
+          "Visiting Vehicles"
+        ]
+      }
+    },
     "/api/v1/vehicles/active": {
       "get": {
         "operationId": "VehiclesController_findAllActive_v1",
@@ -2434,6 +2650,60 @@
               ],
               "type": "string"
             }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Filter by createdAt >= from (ISO date)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Filter by createdAt <= to (ISO date)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "action",
+            "required": false,
+            "in": "query",
+            "description": "Filter by action",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "module",
+            "required": false,
+            "in": "query",
+            "description": "Filter by module",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by user ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "username",
+            "required": false,
+            "in": "query",
+            "description": "Filter by username",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2446,7 +2716,7 @@
             "JWT-auth": []
           }
         ],
-        "summary": "Get all audit logs with pagination, search, and sorting",
+        "summary": "Get all audit logs with pagination, search, sorting, and filters",
         "tags": [
           "Audit Logs"
         ]
@@ -2923,6 +3193,10 @@
       "CreateGateDto": {
         "type": "object",
         "properties": {
+          "code": {
+            "type": "string",
+            "example": "EG1"
+          },
           "name": {
             "type": "string",
             "example": "Entry Gate 1"
@@ -2941,6 +3215,7 @@
           }
         },
         "required": [
+          "code",
           "name",
           "type"
         ]
@@ -2948,6 +3223,10 @@
       "UpdateGateDto": {
         "type": "object",
         "properties": {
+          "code": {
+            "type": "string",
+            "example": "EG1"
+          },
           "name": {
             "type": "string",
             "example": "Entry Gate 1"

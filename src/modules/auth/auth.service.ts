@@ -11,6 +11,8 @@ import { UsersService } from '@/modules/users/users.service';
 import { RegisterDto, LoginDto, ChangePasswordDto, TokensDto } from './dto';
 import { User } from '@/modules/users/entities/user.entity';
 import { Role } from '@/modules/roles/enums/role.enum';
+import { AuditLogsService } from '@/modules/audit-logs/audit-logs.service';
+import { AuditAction, AuditModule } from '@/modules/audit-logs/enums/audit.enum';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +20,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<TokensDto> {
@@ -45,26 +48,57 @@ export class AuthService {
     const tokens = await this.generateTokens(user);
     await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
 
+    await this.auditLogsService.log({
+      userId: user.id,
+      username: user.username,
+      action: AuditAction.CREATE,
+      module: AuditModule.USERS,
+    });
+
     return tokens;
   }
 
   async login(loginDto: LoginDto): Promise<TokensDto> {
     const user = await this.usersService.findByUsername(loginDto.username);
     if (!user) {
+      await this.auditLogsService.log({
+        username: loginDto.username,
+        action: AuditAction.LOGIN_FAILED,
+        module: AuditModule.AUTH,
+      });
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const isPasswordValid = await user.validatePassword(loginDto.password);
     if (!isPasswordValid) {
+      await this.auditLogsService.log({
+        userId: user.id,
+        username: user.username,
+        action: AuditAction.LOGIN_FAILED,
+        module: AuditModule.AUTH,
+      });
       throw new UnauthorizedException('Invalid credentials');
     }
 
     if (!user.isActive) {
+      await this.auditLogsService.log({
+        userId: user.id,
+        username: user.username,
+        action: AuditAction.LOGIN_FAILED,
+        module: AuditModule.AUTH,
+      });
       throw new UnauthorizedException('User account is inactive');
     }
 
     const tokens = await this.generateTokens(user);
     await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
+
+    await this.auditLogsService.log({
+      userId: user.id,
+      username: user.username,
+      action: AuditAction.LOGIN,
+      module: AuditModule.AUTH,
+    });
 
     return tokens;
   }
@@ -112,11 +146,27 @@ export class AuthService {
     user.mustChangePassword = changePasswordDto.mustChangePassword ?? false;
     await this.usersService.save(user);
 
+    await this.auditLogsService.log({
+      userId: user.id,
+      username: user.username,
+      action: AuditAction.CHANGE_PASSWORD,
+      module: AuditModule.AUTH,
+      newValues: { targetUserId: user.id },
+    });
+
     return { message: 'Password changed successfully' };
   }
 
   async logout(userId: string): Promise<void> {
+    const user = await this.usersService.findOne(userId);
     await this.usersService.updateRefreshToken(userId, null);
+
+    await this.auditLogsService.log({
+      userId,
+      username: user?.username,
+      action: AuditAction.LOGOUT,
+      module: AuditModule.AUTH,
+    });
   }
 
   async refreshTokens(

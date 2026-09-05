@@ -23,6 +23,8 @@ import {
   ExcelExportHelper,
   ExcelColumn,
 } from '@/shared/helpers/excel-export.helper';
+import { AuditLogsService } from '@/modules/audit-logs/audit-logs.service';
+import { AuditAction, AuditModule } from '@/modules/audit-logs/enums/audit.enum';
 
 @Injectable()
 export class TrucksService {
@@ -30,6 +32,7 @@ export class TrucksService {
     @InjectRepository(ContainerTruck)
     private readonly containerTruckRepository: Repository<ContainerTruck>,
     private readonly blacklistService: BlacklistService,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
 
   async findAll(
@@ -92,7 +95,15 @@ export class TrucksService {
       truck.entryTime = new Date();
     }
 
-    return this.containerTruckRepository.save(truck);
+    const saved = await this.containerTruckRepository.save(truck);
+
+    await this.auditLogsService.log({
+      action: AuditAction.CREATE,
+      module: AuditModule.TRUCKS,
+      newValues: { id: saved.id, licensePlate: saved.licensePlate },
+    });
+
+    return saved;
   }
 
   async registerEntry(dto: RegisterTruckEntryDto): Promise<ContainerTruck> {
@@ -131,7 +142,15 @@ export class TrucksService {
       entryTime: new Date(),
     });
 
-    return this.containerTruckRepository.save(truck);
+    const saved = await this.containerTruckRepository.save(truck);
+
+    await this.auditLogsService.log({
+      action: AuditAction.ENTRY,
+      module: AuditModule.TRUCKS,
+      newValues: { id: saved.id, licensePlate: saved.licensePlate },
+    });
+
+    return saved;
   }
 
   async registerExit(
@@ -147,7 +166,15 @@ export class TrucksService {
       truck.remarks = dto.remarks;
     }
 
-    return this.containerTruckRepository.save(truck);
+    const saved = await this.containerTruckRepository.save(truck);
+
+    await this.auditLogsService.log({
+      action: AuditAction.EXIT,
+      module: AuditModule.TRUCKS,
+      newValues: { id: saved.id, status: saved.status },
+    });
+
+    return saved;
   }
 
   async update(
@@ -155,19 +182,43 @@ export class TrucksService {
     updateTruckDto: UpdateTruckDto,
   ): Promise<ContainerTruck> {
     const truck = await this.findOne(id);
+    const oldValues = { ...truck };
     Object.assign(truck, updateTruckDto);
-    return this.containerTruckRepository.save(truck);
+    const saved = await this.containerTruckRepository.save(truck);
+
+    await this.auditLogsService.log({
+      action: AuditAction.UPDATE,
+      module: AuditModule.TRUCKS,
+      oldValues: { ...oldValues },
+      newValues: { id: saved.id, ...updateTruckDto },
+    });
+
+    return saved;
   }
 
   async cancel(id: string): Promise<ContainerTruck> {
     const truck = await this.findOne(id);
     truck.status = TruckStatus.CANCELLED;
-    return this.containerTruckRepository.save(truck);
+    const saved = await this.containerTruckRepository.save(truck);
+
+    await this.auditLogsService.log({
+      action: AuditAction.CANCEL,
+      module: AuditModule.TRUCKS,
+      newValues: { id: saved.id, status: saved.status },
+    });
+
+    return saved;
   }
 
   async remove(id: string): Promise<void> {
     const truck = await this.findOne(id);
     await this.containerTruckRepository.softRemove(truck);
+
+    await this.auditLogsService.log({
+      action: AuditAction.DELETE,
+      module: AuditModule.TRUCKS,
+      newValues: { id, licensePlate: truck.licensePlate },
+    });
   }
 
   async findAllActive(
@@ -265,6 +316,12 @@ export class TrucksService {
     ExcelExportHelper.addRows(worksheet, rows);
     ExcelExportHelper.styleHeaderRow(worksheet);
     ExcelExportHelper.autoFitColumns(worksheet);
+
+    await this.auditLogsService.log({
+      action: AuditAction.EXPORT,
+      module: AuditModule.TRUCKS,
+      newValues: { count: trucks.length, search: query.search || null },
+    });
 
     return ExcelExportHelper.generateBuffer(workbook);
   }
