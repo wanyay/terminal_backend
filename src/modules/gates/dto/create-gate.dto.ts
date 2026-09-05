@@ -3,6 +3,11 @@ import { IsNotEmpty, IsString, IsEnum, IsOptional } from 'class-validator';
 import { GateType } from '../enums/gate-type.enum';
 
 export class CreateGateDto {
+  @ApiProperty({ example: 'EG1' })
+  @IsString()
+  @IsNotEmpty()
+  code: string;
+
   @ApiProperty({ example: 'Entry Gate 1' })
   @IsString()
   @IsNotEmpty()

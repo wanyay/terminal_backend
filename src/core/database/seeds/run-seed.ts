@@ -34,31 +34,37 @@ async function bootstrap() {
   console.log('Creating default gates...');
   const defaultGateNames = [
     {
+      code: 'EG1',
       name: 'Entry Gate 1',
       type: GateType.ENTRY,
       description: 'Main entry gate for container trucks',
     },
     {
+      code: 'EG2',
       name: 'Entry Gate 2',
       type: GateType.ENTRY,
       description: 'Secondary entry gate for container trucks',
     },
     {
+      code: 'EG3',
       name: 'Entry Gate 3',
       type: GateType.ENTRY,
       description: 'Visitor entry gate',
     },
     {
+      code: 'XG1',
       name: 'Exit Gate 1',
       type: GateType.EXIT,
       description: 'Main exit gate for container trucks',
     },
     {
+      code: 'XG2',
       name: 'Exit Gate 2',
       type: GateType.EXIT,
       description: 'Secondary exit gate',
     },
     {
+      code: 'XG3',
       name: 'Exit Gate 3',
       type: GateType.EXIT,
       description: 'Visitor exit gate',
